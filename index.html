@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AuraMatch Delhi — AI Bridal Makeup Matchmaker</title>
+  <meta name="description" content="Upload your bridal moodboard and let AI match you with Delhi's finest makeup artists. Powered by Groq Llama Vision." />
+
+  <!-- Google Fonts: Playfair Display (serif headers) + Inter (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+
+  <style>
+    /* ─────────────────────────────────────────────────────────
+       DESIGN TOKENS
+    ───────────────────────────────────────────────────────── */
+    :root {
+      --alabaster:  #FAFAFA;
+      --charcoal:   #1A1A1A;
+      --gold:       #D4AF37;
+      --gold-light: #E8CC6A;
+      --gold-dark:  #A88B1D;
+      --warm-grey:  #F3F0EB;
+      --mid-grey:   #9A9A9A;
+      --border:     #E2DDD6;
+      --card-bg:    #FFFFFF;
+      --shadow-sm:  0 2px 12px rgba(26,26,26,.06);
+      --shadow-md:  0 8px 32px rgba(26,26,26,.10);
+      --shadow-lg:  0 20px 60px rgba(26,26,26,.14);
+      --radius:     16px;
+      --transition: .3s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       BASE
+    ───────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--alabaster);
+      color: var(--charcoal);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4, .serif {
+      font-family: 'Playfair Display', Georgia, serif;
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       NAVBAR
+    ───────────────────────────────────────────────────────── */
+    .am-nav {
+      background: rgba(250,250,250,.88);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border);
+      padding: .9rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 1030;
+    }
+
+    .am-nav .brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--charcoal);
+      letter-spacing: -.2px;
+      text-decoration: none;
+    }
+
+    .am-nav .brand span {
+      color: var(--gold);
+    }
+
+    .nav-pill {
+      background: var(--warm-grey);
+      border: 1px solid var(--border);
+      border-radius: 40px;
+      padding: .3rem .85rem;
+      font-size: .78rem;
+      font-weight: 500;
+      color: var(--mid-grey);
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       GOLD ACCENT LINE
+    ───────────────────────────────────────────────────────── */
+    .gold-rule {
+      width: 48px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light));
+      border-radius: 2px;
+      margin: 0 auto 1.25rem;
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       STATE WRAPPER — show/hide logic
+    ───────────────────────────────────────────────────────── */
+    .state-panel {
+      display: none;
+      animation: fadeUp .45s var(--transition) both;
+    }
+    .state-panel.active { display: block; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       ① LANDING STATE
+    ───────────────────────────────────────────────────────── */
+    .hero-section {
+      padding: 6rem 0 3.5rem;
+    }
+
+    .hero-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      background: var(--warm-grey);
+      border: 1px solid var(--border);
+      border-radius: 40px;
+      padding: .3rem 1rem;
+      font-size: .75rem;
+      font-weight: 600;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      color: var(--gold-dark);
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-kicker .dot {
+      width: 6px; height: 6px;
+      background: var(--gold);
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: .5; transform: scale(1.4); }
+    }
+
+    .hero-title {
+      font-size: clamp(2.6rem, 6vw, 4.2rem);
+      font-weight: 700;
+      line-height: 1.12;
+      letter-spacing: -.5px;
+      color: var(--charcoal);
+      margin-bottom: 1.25rem;
+    }
+
+    .hero-title em {
+      font-style: italic;
+      color: var(--gold-dark);
+    }
+
+    .hero-sub {
+      font-size: 1.05rem;
+      font-weight: 300;
+      color: #555;
+      line-height: 1.7;
+      max-width: 500px;
+    }
+
+    /* ─── Drop Zone ─── */
+    .drop-zone {
+      position: relative;
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      background: var(--card-bg);
+      padding: 3.5rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+      overflow: hidden;
+    }
+
+    .drop-zone::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(212,175,55,.04) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.dragover {
+      border-color: var(--gold);
+      background: rgba(212,175,55,.03);
+      box-shadow: 0 0 0 4px rgba(212,175,55,.12), var(--shadow-md);
+    }
+
+    .drop-icon {
+      width: 68px; height: 68px;
+      background: linear-gradient(135deg, var(--warm-grey), #EDE9E2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.4rem;
+      transition: transform var(--transition), background var(--transition);
+      font-size: 1.7rem;
+      color: var(--gold-dark);
+    }
+
+    .drop-zone:hover .drop-icon,
+    .drop-zone.dragover .drop-icon {
+      transform: scale(1.1) translateY(-3px);
+      background: linear-gradient(135deg, #EDE9E2, #E5DDD0);
+    }
+
+    .drop-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--charcoal);
+      margin-bottom: .5rem;
+    }
+
+    .drop-sub {
+      font-size: .85rem;
+      color: var(--mid-grey);
+      margin-bottom: 1.4rem;
+    }
+
+    #file-input { display: none; }
+
+    /* ─── Buttons ─── */
+    .btn-gold {
+      background: linear-gradient(135deg, var(--charcoal) 0%, #2d2d2d 100%);
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      padding: .7rem 2rem;
+      font-size: .9rem;
+      font-weight: 600;
+      letter-spacing: .3px;
+      transition: all var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-gold::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(212,175,55,.15) 0%, rgba(212,175,55,.05) 100%);
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+
+    .btn-gold:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(26,26,26,.25);
+      color: #fff;
+    }
+
+    .btn-gold:hover::after { opacity: 1; }
+
+    .btn-gold:active { transform: translateY(0); }
+
+    .btn-outline-gold {
+      background: transparent;
+      color: var(--charcoal);
+      border: 1.5px solid var(--charcoal);
+      border-radius: 50px;
+      padding: .65rem 1.75rem;
+      font-size: .88rem;
+      font-weight: 600;
+      letter-spacing: .3px;
+      transition: all var(--transition);
+    }
+
+    .btn-outline-gold:hover {
+      background: var(--charcoal);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    .format-badge {
+      display: inline-block;
+      background: var(--warm-grey);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: .15rem .5rem;
+      font-size: .7rem;
+      font-weight: 600;
+      color: var(--mid-grey);
+      letter-spacing: .4px;
+      text-transform: uppercase;
+      margin: 0 2px;
+    }
+
+    /* ─── Stats strip ─── */
+    .stats-strip {
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 0;
+      margin-top: 3rem;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--charcoal);
+      line-height: 1;
+      margin-bottom: .25rem;
+    }
+
+    .stat-label {
+      font-size: .78rem;
+      font-weight: 500;
+      color: var(--mid-grey);
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+
+    .stat-sep {
+      width: 1px;
+      background: var(--border);
+      height: 40px;
+      margin: auto;
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       ② PROCESSING STATE
+    ───────────────────────────────────────────────────────── */
+    .processing-section {
+      min-height: 70vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .processing-card {
+      background: var(--card-bg);
+      border-radius: 24px;
+      padding: 4rem 3rem;
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border);
+      max-width: 420px;
+      width: 100%;
+    }
+
+    .gold-spinner-wrap {
+      position: relative;
+      width: 80px; height: 80px;
+      margin: 0 auto 2rem;
+    }
+
+    .gold-spinner {
+      width: 80px; height: 80px;
+      border: 3px solid var(--border);
+      border-top-color: var(--gold);
+      border-right-color: var(--gold-light);
+      border-radius: 50%;
+      animation: spin 1.1s linear infinite;
+    }
+
+    .gold-spinner-inner {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      width: 48px; height: 48px;
+      border: 2px solid transparent;
+      border-top-color: var(--charcoal);
+      border-radius: 50%;
+      animation: spin .7s linear infinite reverse;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .processing-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--charcoal);
+      margin-bottom: .6rem;
+    }
+
+    .processing-sub {
+      font-size: .88rem;
+      color: var(--mid-grey);
+      line-height: 1.6;
+    }
+
+    .processing-steps {
+      margin-top: 1.8rem;
+      list-style: none;
+      padding: 0;
+      text-align: left;
+    }
+
+    .processing-steps li {
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+      padding: .5rem 0;
+      font-size: .82rem;
+      color: #888;
+      border-bottom: 1px solid var(--border);
+      transition: color .4s;
+    }
+
+    .processing-steps li:last-child { border-bottom: none; }
+
+    .step-icon {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .65rem;
+      flex-shrink: 0;
+      background: var(--warm-grey);
+      color: var(--mid-grey);
+      transition: all .4s;
+    }
+
+    .step-icon.done {
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: #fff;
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       ③ RESULTS STATE
+    ───────────────────────────────────────────────────────── */
+    .results-section {
+      padding: 3rem 0 5rem;
+    }
+
+    .results-header {
+      margin-bottom: 2.5rem;
+    }
+
+    .results-title {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 700;
+      color: var(--charcoal);
+      margin-bottom: .5rem;
+    }
+
+    /* ─── Left column: image + tags ─── */
+    .preview-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      position: sticky;
+      top: 90px;
+    }
+
+    #preview-image {
+      width: 100%;
+      aspect-ratio: 4/5;
+      object-fit: cover;
+      display: block;
+    }
+
+    .preview-body {
+      padding: 1.4rem;
+    }
+
+    .preview-label {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--gold-dark);
+      margin-bottom: .9rem;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+    }
+
+    .preview-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .ai-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      background: var(--warm-grey);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      padding: .3rem .85rem;
+      font-size: .78rem;
+      font-weight: 500;
+      color: var(--charcoal);
+      margin: .25rem .2rem;
+      transition: all var(--transition);
+    }
+
+    .ai-tag:hover {
+      background: var(--charcoal);
+      color: #fff;
+      border-color: var(--charcoal);
+      transform: translateY(-1px);
+    }
+
+    .ai-tag .tag-dot {
+      width: 5px; height: 5px;
+      background: var(--gold);
+      border-radius: 50%;
+    }
+
+    .fallback-notice {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      background: #FFF9E6;
+      border: 1px solid #F0D870;
+      border-radius: 8px;
+      padding: .6rem .9rem;
+      font-size: .76rem;
+      color: #7A6000;
+      margin-top: 1rem;
+    }
+
+    /* ─── MUA Cards ─── */
+    .mua-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+      margin-bottom: 1.25rem;
+    }
+
+    .mua-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: rgba(212,175,55,.3);
+    }
+
+    .mua-card-inner {
+      display: flex;
+      align-items: stretch;
+    }
+
+    .rank-strip {
+      width: 52px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.2rem .5rem;
+      position: relative;
+    }
+
+    .rank-strip.rank-1 { background: linear-gradient(180deg, #F8F2DC 0%, #EFE4AA 100%); }
+    .rank-strip.rank-2 { background: linear-gradient(180deg, #F4F4F4 0%, #E8E8E8 100%); }
+    .rank-strip.rank-3 { background: linear-gradient(180deg, #FDF0E8 0%, #F0D9C8 100%); }
+
+    .rank-number {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .rank-strip.rank-1 .rank-number { color: #A88B1D; }
+    .rank-strip.rank-2 .rank-number { color: #888; }
+    .rank-strip.rank-3 .rank-number { color: #A0663A; }
+
+    .rank-medal {
+      font-size: .9rem;
+      margin-top: .2rem;
+    }
+
+    .mua-card-body {
+      flex: 1;
+      padding: 1.3rem 1.4rem;
+    }
+
+    .mua-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--charcoal);
+      margin-bottom: .2rem;
+    }
+
+    .mua-location {
+      font-size: .8rem;
+      color: var(--mid-grey);
+      display: flex;
+      align-items: center;
+      gap: .3rem;
+      margin-bottom: .85rem;
+    }
+
+    .match-bar-wrap {
+      margin-bottom: .9rem;
+    }
+
+    .match-bar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: .35rem;
+    }
+
+    .match-label {
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      color: var(--mid-grey);
+    }
+
+    .match-pct {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--gold-dark);
+    }
+
+    .match-bar-bg {
+      height: 5px;
+      background: var(--warm-grey);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .match-bar-fill {
+      height: 100%;
+      border-radius: 10px;
+      background: linear-gradient(90deg, var(--charcoal), var(--gold));
+      transition: width 1s cubic-bezier(.4,0,.2,1);
+    }
+
+    .mua-meta {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .meta-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: .3rem;
+      background: var(--warm-grey);
+      border-radius: 6px;
+      padding: .22rem .65rem;
+      font-size: .75rem;
+      color: #555;
+      font-weight: 500;
+    }
+
+    .meta-chip i { color: var(--gold-dark); font-size: .75rem; }
+
+    .mua-card-actions {
+      display: flex;
+      gap: .6rem;
+      align-items: center;
+    }
+
+    .btn-book {
+      flex: 1;
+      background: var(--charcoal);
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      padding: .55rem 1.2rem;
+      font-size: .83rem;
+      font-weight: 600;
+      letter-spacing: .2px;
+      transition: all var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-book::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(212,175,55,.2), transparent);
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+
+    .btn-book:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(26,26,26,.3);
+      color: #fff;
+    }
+
+    .btn-book:hover::after { opacity: 1; }
+
+    .btn-ig {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      color: var(--charcoal);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      transition: all var(--transition);
+      flex-shrink: 0;
+    }
+
+    .btn-ig:hover {
+      background: var(--charcoal);
+      color: #fff;
+      border-color: var(--charcoal);
+      transform: scale(1.1);
+    }
+
+    .btn-call {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      border: 1.5px solid #28a745;
+      background: transparent;
+      color: #28a745;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      transition: all var(--transition);
+      flex-shrink: 0;
+      text-decoration: none;
+    }
+    .btn-call:hover {
+      background: #28a745;
+      color: #fff;
+      border-color: #28a745;
+      transform: scale(1.1);
+    }
+
+    /* ── Booking Modal ── */
+    .modal-content {
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-lg);
+    }
+    .modal-header {
+      border-bottom: 1px solid var(--border);
+      padding: 1.4rem 1.75rem;
+    }
+    .modal-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--charcoal);
+    }
+    .modal-artist-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .45rem;
+      background: var(--warm-grey);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      padding: .25rem .9rem;
+      font-size: .8rem;
+      font-weight: 600;
+      color: var(--gold-dark);
+      margin-bottom: 1.2rem;
+    }
+    .form-label {
+      font-size: .8rem;
+      font-weight: 600;
+      color: var(--charcoal);
+      letter-spacing: .2px;
+    }
+    .form-control, .form-select {
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: .88rem;
+      padding: .55rem .85rem;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(212,175,55,.15);
+      outline: none;
+    }
+    .modal-phone-strip {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      background: #F0FDF4;
+      border: 1px solid #BBF7D0;
+      border-radius: 10px;
+      padding: .7rem 1rem;
+      margin-bottom: 1rem;
+    }
+    .modal-phone-strip i { color: #16a34a; font-size: 1.1rem; }
+    .modal-phone-strip .ph-num {
+      font-weight: 600;
+      font-size: .9rem;
+      color: var(--charcoal);
+      flex: 1;
+    }
+    .modal-phone-strip a {
+      font-size: .8rem;
+      font-weight: 600;
+      color: #16a34a;
+      text-decoration: none;
+    }
+    .modal-phone-strip a:hover { text-decoration: underline; }
+    .btn-submit-book {
+      background: linear-gradient(135deg, var(--charcoal), #2d2d2d);
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      padding: .65rem 2rem;
+      font-size: .9rem;
+      font-weight: 600;
+      width: 100%;
+      transition: all var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-submit-book::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(212,175,55,.18), transparent);
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+    .btn-submit-book:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(26,26,26,.25); }
+    .btn-submit-book:hover::after { opacity: 1; }
+    .booking-success {
+      text-align: center;
+      padding: 1.5rem 0 .5rem;
+    }
+    .booking-success .success-icon {
+      width: 68px; height: 68px;
+      background: linear-gradient(135deg, #D4EDDA, #A8D5B5);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem;
+      margin: 0 auto 1.2rem;
+    }
+    .booking-success h5 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--charcoal);
+      margin-bottom: .5rem;
+    }
+    .booking-success p { font-size: .88rem; color: var(--mid-grey); line-height: 1.6; }
+
+    /* ─── Try Again button ─── */
+    .try-again-wrap {
+      text-align: center;
+      margin-top: 2.5rem;
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       FOOTER
+    ───────────────────────────────────────────────────────── */
+    .am-footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem 0;
+      text-align: center;
+      font-size: .8rem;
+      color: var(--mid-grey);
+    }
+
+    .am-footer strong { color: var(--charcoal); }
+
+    /* ─────────────────────────────────────────────────────────
+       RESPONSIVE
+    ───────────────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .hero-section { padding: 3.5rem 0 2rem; }
+      .hero-title { font-size: 2.2rem; }
+      .drop-zone { padding: 2.2rem 1.2rem; }
+      .processing-card { padding: 2.8rem 1.5rem; }
+      .results-section { padding: 2rem 0 3rem; }
+      .mua-card-inner { flex-direction: column; }
+      .rank-strip { width: 100%; flex-direction: row; padding: .6rem 1rem; gap: .4rem; }
+      .preview-card { position: static; }
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       SKELETON SHIMMER (before results render)
+    ───────────────────────────────────────────────────────── */
+    @keyframes shimmer {
+      0%   { background-position: -400px 0; }
+      100% { background-position: 400px 0; }
+    }
+
+    .shimmer {
+      background: linear-gradient(90deg, var(--warm-grey) 25%, #EEE9E0 50%, var(--warm-grey) 75%);
+      background-size: 800px 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ── NAVBAR ─────────────────────────────────────────── -->
+  <nav class="am-nav">
+    <div class="container d-flex align-items-center justify-content-between">
+      <a href="#" class="brand" id="nav-brand-link">Aura<span>Match</span></a>
+      <span class="nav-pill"><i class="bi bi-stars me-1"></i>Delhi NCR</span>
+    </div>
+  </nav>
+
+  <!-- ── MAIN ───────────────────────────────────────────── -->
+  <main>
+
+    <!-- ① LANDING STATE ────────────────────────────────── -->
+    <section id="state-landing" class="state-panel active">
+      <div class="hero-section">
+        <div class="container">
+          <div class="row align-items-center gy-5">
+
+            <!-- Left: copy -->
+            <div class="col-lg-5">
+              <div class="hero-kicker">
+                <span class="dot"></span>
+                Groq Vision · Live
+              </div>
+              <h1 class="hero-title">
+                Find Your <em>Perfect</em><br>Bridal Artist
+              </h1>
+              <p class="hero-sub">
+                Upload your dream bridal moodboard. Our AI reads your aesthetic
+                in seconds and matches you with Delhi's most compatible makeup artists.
+              </p>
+              <div class="d-flex gap-3 flex-wrap mt-4">
+                <div class="d-flex align-items-center gap-2">
+                  <i class="bi bi-check-circle-fill" style="color:var(--gold);font-size:.9rem;"></i>
+                  <span style="font-size:.85rem;color:#555;">Instant AI analysis</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                  <i class="bi bi-check-circle-fill" style="color:var(--gold);font-size:.9rem;"></i>
+                  <span style="font-size:.85rem;color:#555;">Top 3 curated matches</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                  <i class="bi bi-check-circle-fill" style="color:var(--gold);font-size:.9rem;"></i>
+                  <span style="font-size:.85rem;color:#555;">Style-tag precision</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: drop zone -->
+            <div class="col-lg-7">
+              <div
+                id="drop-zone"
+                class="drop-zone"
+                role="button"
+                aria-label="Upload bridal moodboard image"
+                tabindex="0"
+              >
+                <div class="drop-icon">
+                  <i class="bi bi-image-fill"></i>
+                </div>
+                <div class="drop-title">Drop your bridal moodboard here</div>
+                <div class="drop-sub">
+                  Drag &amp; drop, or click to browse
+                </div>
+                <button
+                  id="browse-btn"
+                  class="btn btn-gold px-4"
+                  type="button"
+                >
+                  <i class="bi bi-upload me-2"></i>Choose Photo
+                </button>
+                <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" />
+                <div class="mt-3">
+                  <span class="format-badge">JPG</span>
+                  <span class="format-badge">PNG</span>
+                  <span class="format-badge">WEBP</span>
+                  <small class="ms-1" style="color:var(--mid-grey);font-size:.75rem;">· Max 10 MB</small>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /row -->
+        </div><!-- /container -->
+      </div><!-- /hero-section -->
+
+      <!-- Stats strip -->
+      <div class="stats-strip">
+        <div class="container">
+          <div class="row text-center gy-3">
+            <div class="col-4">
+              <div class="stat-number">5+</div>
+              <div class="stat-label">Curated Artists</div>
+            </div>
+            <div class="col-4">
+              <div class="stat-number">15</div>
+              <div class="stat-label">Style Tags</div>
+            </div>
+            <div class="col-4">
+              <div class="stat-number">&lt;3s</div>
+              <div class="stat-label">AI Match Time</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section><!-- /state-landing -->
+
+
+    <!-- ② PROCESSING STATE ─────────────────────────────── -->
+    <section id="state-processing" class="state-panel">
+      <div class="processing-section container">
+        <div class="processing-card mx-auto">
+
+          <div class="gold-spinner-wrap">
+            <div class="gold-spinner"></div>
+            <div class="gold-spinner-inner"></div>
+          </div>
+
+          <h2 class="processing-title">AI is analyzing your bridal moodboard...</h2>
+          <p class="processing-sub">Groq Llama Vision is reading your aesthetic and mapping it to style tags</p>
+
+          <ul class="processing-steps" id="processing-steps">
+            <li id="step-1">
+              <span class="step-icon" id="step-icon-1"><i class="bi bi-upload"></i></span>
+              Uploading moodboard image
+            </li>
+            <li id="step-2">
+              <span class="step-icon" id="step-icon-2"><i class="bi bi-eye"></i></span>
+              Groq scanning aesthetics
+            </li>
+            <li id="step-3">
+              <span class="step-icon" id="step-icon-3"><i class="bi bi-tags"></i></span>
+              Extracting style fingerprint
+            </li>
+            <li id="step-4">
+              <span class="step-icon" id="step-icon-4"><i class="bi bi-people"></i></span>
+              Matching to Delhi artists
+            </li>
+          </ul>
+
+        </div>
+      </div>
+    </section><!-- /state-processing -->
+
+
+    <!-- ③ RESULTS STATE ─────────────────────────────────── -->
+    <section id="state-results" class="state-panel results-section">
+      <div class="container">
+
+        <div class="results-header">
+          <div class="gold-rule"></div>
+          <h2 class="results-title text-center">Your Matched Artists</h2>
+          <p class="text-center" style="color:var(--mid-grey);font-size:.9rem;">
+            Based on your moodboard's aesthetic fingerprint
+          </p>
+        </div>
+
+        <div class="row gy-4 align-items-start">
+
+          <!-- Left: image preview + AI tags -->
+          <div class="col-lg-4">
+            <div class="preview-card">
+              <img id="preview-image" src="" alt="Your uploaded moodboard" />
+              <div class="preview-body">
+                <div class="preview-label">
+                  <i class="bi bi-stars" style="color:var(--gold);"></i>
+                  AI Style Fingerprint
+                </div>
+                <div id="ai-tags-container"></div>
+                <div id="fallback-notice" class="fallback-notice d-none">
+                  <i class="bi bi-info-circle-fill"></i>
+                  Using default style tags (AI offline)
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: MUA cards -->
+          <div class="col-lg-8">
+            <div id="mua-cards-container"></div>
+
+            <div class="try-again-wrap">
+              <button id="try-again-btn" class="btn btn-outline-gold">
+                <i class="bi bi-arrow-left me-2"></i>Try Another Photo
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section><!-- /state-results -->
+
+  </main>
+
+  <!-- ── BOOKING MODAL ──────────────────────────────────────── -->
+  <div class="modal fade" id="bookingModal" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="bookingModalLabel">
+            <i class="bi bi-calendar-heart me-2" style="color:var(--gold);"></i>Book a Consultation
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4" id="booking-modal-body">
+
+          <!-- Artist badge -->
+          <div class="modal-artist-badge" id="modal-artist-badge">
+            <i class="bi bi-person-circle"></i>
+            <span id="modal-artist-name">Artist Name</span>
+          </div>
+
+          <!-- Direct call strip -->
+          <div class="modal-phone-strip">
+            <i class="bi bi-telephone-fill"></i>
+            <span class="ph-num" id="modal-artist-phone">+91 00000 00000</span>
+            <a href="#" id="modal-call-link">📞 Tap to Call</a>
+          </div>
+
+          <!-- Booking form -->
+          <form id="booking-form" novalidate>
+            <input type="hidden" id="booking-artist-id" value="" />
+
+            <div class="mb-3">
+              <label for="client-name" class="form-label">Your Full Name *</label>
+              <input type="text" class="form-control" id="client-name"
+                placeholder="e.g. Riya Kapoor" required />
+            </div>
+
+            <div class="mb-3">
+              <label for="client-phone" class="form-label">Your Phone Number *</label>
+              <input type="tel" class="form-control" id="client-phone"
+                placeholder="+91 98765 00000" required />
+            </div>
+
+            <div class="mb-3">
+              <label for="preferred-date" class="form-label">Preferred Appointment Date *</label>
+              <input type="date" class="form-control" id="preferred-date" required />
+            </div>
+
+            <div class="mb-4">
+              <label for="booking-message" class="form-label">Message <span style="color:var(--mid-grey);font-weight:400;">(optional)</span></label>
+              <textarea class="form-control" id="booking-message" rows="2"
+                placeholder="e.g. Looking for a dewy, soft-glam bridal look for my November wedding."></textarea>
+            </div>
+
+            <div id="booking-form-error" class="text-danger small mb-3 d-none"></div>
+
+            <button type="submit" class="btn-submit-book" id="submit-booking-btn">
+              <i class="bi bi-check2-circle me-2"></i>Confirm Consultation Request
+            </button>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FOOTER ──────────────────────────────────────────── -->
+  <footer class="am-footer">
+    <div class="container">
+      <strong>AuraMatch Delhi</strong> &nbsp;·&nbsp;
+      Built for Hackathon &nbsp;·&nbsp;
+      Powered by Groq Llama Vision
+    </div>
+  </footer>
+
+  <!-- ── Bootstrap JS ────────────────────────────────────── -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════════════════
+     AURAMATCH DELHI — APP LOGIC
+     Three states: landing → processing → results
+  ═══════════════════════════════════════════════════════════ */
+
+  const API_BASE = 'http://127.0.0.1:5000';
+
+  // ── DOM refs ───────────────────────────────────────────────
+  const panels = {
+    landing:    document.getElementById('state-landing'),
+    processing: document.getElementById('state-processing'),
+    results:    document.getElementById('state-results'),
+  };
+
+  const dropZone         = document.getElementById('drop-zone');
+  const fileInput        = document.getElementById('file-input');
+  const browseBtn        = document.getElementById('browse-btn');
+  const previewImage     = document.getElementById('preview-image');
+  const aiTagsContainer  = document.getElementById('ai-tags-container');
+  const muaCardsContainer= document.getElementById('mua-cards-container');
+  const fallbackNotice   = document.getElementById('fallback-notice');
+  const tryAgainBtn      = document.getElementById('try-again-btn');
+  const navBrandLink     = document.getElementById('nav-brand-link');
+
+  // Processing step icons
+  const stepIcons = [1,2,3,4].map(n => document.getElementById(`step-icon-${n}`));
+
+  // ── State machine ──────────────────────────────────────────
+  function showState(name) {
+    Object.entries(panels).forEach(([key, el]) => {
+      el.classList.toggle('active', key === name);
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ── Drag & Drop wiring ─────────────────────────────────────
+  dropZone.addEventListener('dragover', e => {
+    e.preventDefault();
+    dropZone.classList.add('dragover');
+  });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  });
+
+  // Click to browse
+  browseBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    fileInput.click();
+  });
+  dropZone.addEventListener('click', () => fileInput.click());
+  dropZone.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+  });
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files[0]) handleFile(fileInput.files[0]);
+    fileInput.value = ''; // reset so same file can be reselected
+  });
+
+  // Reset
+  tryAgainBtn.addEventListener('click', () => showState('landing'));
+  navBrandLink.addEventListener('click', e => { e.preventDefault(); showState('landing'); });
+
+  // ── Processing step animation ──────────────────────────────
+  let stepTimer = null;
+
+  function animateSteps() {
+    let step = 0;
+    stepIcons.forEach(icon => {
+      icon.classList.remove('done');
+      icon.innerHTML = icon.querySelector('i')
+        ? icon.innerHTML
+        : '<i class="bi bi-circle"></i>';
+    });
+
+    const delays = [400, 1200, 2200, 3100];
+
+    stepTimer = delays.forEach((delay, i) => {
+      setTimeout(() => {
+        if (panels.processing.classList.contains('active')) {
+          stepIcons[i].classList.add('done');
+          stepIcons[i].innerHTML = '<i class="bi bi-check-lg"></i>';
+        }
+      }, delay);
+    });
+  }
+
+  // ── File → base64 → API call ──────────────────────────────
+  function handleFile(file) {
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload an image file (JPG, PNG, or WEBP).');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File is too large. Please use an image under 10 MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const dataUrl = e.target.result;                  // full data URL
+      const base64  = dataUrl.split(',')[1];            // strip MIME prefix
+
+      // Show preview image immediately
+      previewImage.src = dataUrl;
+
+      // Transition to processing state
+      showState('processing');
+      animateSteps();
+
+      // Call the Flask API
+      try {
+        const response = await fetch(`${API_BASE}/api/match`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ image: base64 }),
+        });
+
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          throw new Error(err.error || `Server error ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // Small delay so users see step 4 tick before results
+        setTimeout(() => renderResults(data), 700);
+
+      } catch (err) {
+        console.error('API error:', err);
+        setTimeout(() => {
+          alert(`Something went wrong: ${err.message}\n\nMake sure the Flask backend is running on port 5000.`);
+          showState('landing');
+        }, 500);
+      }
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+  // ── Render results ─────────────────────────────────────────
+  function renderResults(data) {
+    // AI tags
+    aiTagsContainer.innerHTML = '';
+    (data.ai_tags || []).forEach(tag => {
+      const span = document.createElement('span');
+      span.className = 'ai-tag';
+      span.innerHTML = `<span class="tag-dot"></span>${tag}`;
+      aiTagsContainer.appendChild(span);
+    });
+
+    // Fallback notice
+    if (data.fallback) {
+      fallbackNotice.classList.remove('d-none');
+    } else {
+      fallbackNotice.classList.add('d-none');
+    }
+
+    // MUA cards
+    muaCardsContainer.innerHTML = '';
+    const results = data.results || [];
+
+    if (results.length === 0) {
+      muaCardsContainer.innerHTML = `
+        <div class="text-center py-5" style="color:var(--mid-grey);">
+          <i class="bi bi-emoji-neutral" style="font-size:2.5rem;"></i>
+          <p class="mt-3">No matching artists found. Try seeding the database first.</p>
+        </div>`;
+    } else {
+      results.forEach((artist, idx) => {
+        muaCardsContainer.appendChild(buildMuaCard(artist, idx + 1));
+      });
+    }
+
+    // Show results state
+    showState('results');
+
+    // Animate match bars after DOM paint
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.querySelectorAll('.match-bar-fill').forEach(bar => {
+          bar.style.width = bar.dataset.pct + '%';
+        });
+      });
+    });
+  }
+
+  // ── Build a single MUA card ────────────────────────────────
+  function buildMuaCard(artist, rank) {
+    const medals  = ['🥇','🥈','🥉'];
+    const score   = artist.match_score ?? 0;
+    const barPct  = Math.min(score, 100);
+
+    const card = document.createElement('div');
+    card.className = 'mua-card';
+
+    // Style tags chips (show first 3)
+    const tagChips = (artist.style_tags || [])
+      .slice(0, 4)
+      .map(t => `<span class="ai-tag" style="font-size:.73rem;padding:.2rem .7rem;">${t}</span>`)
+      .join('');
+
+    card.innerHTML = `
+      <div class="mua-card-inner">
+
+        <!-- Rank strip -->
+        <div class="rank-strip rank-${rank}">
+          <div class="rank-number">${rank}</div>
+          <div class="rank-medal">${medals[rank - 1] || ''}</div>
+        </div>
+
+        <!-- Body -->
+        <div class="mua-card-body">
+          <div class="mua-name">${escHtml(artist.name)}</div>
+          <div class="mua-location">
+            <i class="bi bi-geo-alt-fill" style="color:var(--gold);font-size:.75rem;"></i>
+            ${escHtml(artist.location)}
+          </div>
+
+          <!-- Match bar -->
+          <div class="match-bar-wrap">
+            <div class="match-bar-header">
+              <span class="match-label">Aesthetic Match</span>
+              <span class="match-pct">${score}%</span>
+            </div>
+            <div class="match-bar-bg">
+              <div
+                class="match-bar-fill"
+                style="width:0%"
+                data-pct="${barPct}"
+              ></div>
+            </div>
+          </div>
+
+          <!-- Meta chips -->
+          <div class="mua-meta">
+            <span class="meta-chip">
+              <i class="bi bi-currency-rupee"></i>
+              From ${escHtml(artist.starting_price)}
+            </span>
+            <span class="meta-chip">
+              <i class="bi bi-instagram"></i>
+              ${escHtml(artist.instagram)}
+            </span>
+          </div>
+
+          <!-- Style tags -->
+          <div class="mb-3" style="line-height:2;">
+            ${tagChips}
+          </div>
+
+          <!-- CTA -->
+          <div class="mua-card-actions">
+            <button
+              type="button"
+              class="btn btn-book"
+              id="book-btn-${rank}"
+              data-artist-id="${artist.id}"
+              data-artist-name="${escHtml(artist.name)}"
+              data-artist-phone="${escHtml(artist.phone || '')}"
+              onclick="openBookingModal(this)"
+            >
+              <i class="bi bi-calendar-check me-1"></i>Book Consultation
+            </button>
+            <a
+              href="tel:${escHtml((artist.phone || '').replace(/\s/g,''))}"
+              class="btn-call"
+              aria-label="Call ${escHtml(artist.name)}"
+              title="Call: ${escHtml(artist.phone || '')}"
+              id="call-btn-${rank}"
+            >
+              <i class="bi bi-telephone-fill"></i>
+            </a>
+            <a
+              href="https://instagram.com/${escHtml(artist.instagram.replace('@',''))}"
+              target="_blank"
+              rel="noopener"
+              class="btn-ig"
+              aria-label="Instagram"
+              id="ig-btn-${rank}"
+            >
+              <i class="bi bi-instagram"></i>
+            </a>
+          </div>
+
+        </div><!-- /mua-card-body -->
+      </div><!-- /mua-card-inner -->
+    `;
+
+    return card;
+  }
+
+  // ── XSS guard ──────────────────────────────────────────────
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // ── Initial state ──────────────────────────────────────────
+  showState('landing');
+
+  // ── Booking modal logic ────────────────────────────────────
+  const bookingModal    = new bootstrap.Modal(document.getElementById('bookingModal'));
+  const bookingForm     = document.getElementById('booking-form');
+  const bookingError    = document.getElementById('booking-form-error');
+  const submitBookingBtn= document.getElementById('submit-booking-btn');
+
+  // Set tomorrow as the minimum bookable date
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  document.getElementById('preferred-date').min = tomorrow.toISOString().split('T')[0];
+
+  function openBookingModal(btn) {
+    const artistId   = btn.dataset.artistId;
+    const artistName = btn.dataset.artistName;
+    const artistPhone= btn.dataset.artistPhone;
+
+    document.getElementById('booking-artist-id').value   = artistId;
+    document.getElementById('modal-artist-name').textContent = artistName;
+    document.getElementById('modal-artist-phone').textContent = artistPhone || 'Not available';
+
+    const callLink = document.getElementById('modal-call-link');
+    if (artistPhone) {
+      callLink.href = 'tel:' + artistPhone.replace(/\s/g, '');
+      callLink.style.display = '';
+    } else {
+      callLink.style.display = 'none';
+    }
+
+    // Reset form
+    bookingForm.reset();
+    bookingError.classList.add('d-none');
+    bookingError.textContent = '';
+    showBookingForm();
+    bookingModal.show();
+  }
+
+  function showBookingForm() {
+    document.getElementById('booking-form').style.display = '';
+    const success = document.getElementById('booking-success-view');
+    if (success) success.remove();
+  }
+
+  bookingForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    bookingError.classList.add('d-none');
+
+    const artistId     = document.getElementById('booking-artist-id').value;
+    const clientName   = document.getElementById('client-name').value.trim();
+    const clientPhone  = document.getElementById('client-phone').value.trim();
+    const preferredDate= document.getElementById('preferred-date').value;
+    const message      = document.getElementById('booking-message').value.trim();
+
+    if (!clientName || !clientPhone || !preferredDate) {
+      bookingError.textContent = 'Please fill in all required fields.';
+      bookingError.classList.remove('d-none');
+      return;
+    }
+
+    submitBookingBtn.disabled = true;
+    submitBookingBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Booking...';
+
+    try {
+      const res = await fetch(`${API_BASE}/api/book`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          artist_id:      parseInt(artistId),
+          client_name:    clientName,
+          client_phone:   clientPhone,
+          preferred_date: preferredDate,
+          message,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || 'Booking failed.');
+
+      // Show success view inside modal body
+      const artistName = document.getElementById('modal-artist-name').textContent;
+      const artistPhone = document.getElementById('modal-artist-phone').textContent;
+      const formattedDate = new Date(preferredDate + 'T00:00:00').toLocaleDateString('en-IN', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+      });
+
+      bookingForm.style.display = 'none';
+      const successDiv = document.createElement('div');
+      successDiv.id = 'booking-success-view';
+      successDiv.className = 'booking-success';
+      successDiv.innerHTML = `
+        <div class="success-icon">✅</div>
+        <h5>Consultation Requested!</h5>
+        <p>
+          Your request with <strong>${escHtml(artistName)}</strong><br>
+          has been sent for <strong>${escHtml(formattedDate)}</strong>.
+        </p>
+        <div class="modal-phone-strip mt-3">
+          <i class="bi bi-telephone-fill"></i>
+          <span class="ph-num">${escHtml(artistPhone)}</span>
+          <a href="tel:${escHtml(artistPhone.replace(/\s/g,''))}">📞 Call Now</a>
+        </div>
+        <p class="mt-3" style="font-size:.8rem;color:var(--mid-grey);">
+          The artist will contact you on <strong>${escHtml(clientPhone)}</strong> to confirm.
+        </p>
+        <button class="btn-submit-book mt-2" onclick="bookingModal.hide()">
+          <i class="bi bi-check-lg me-2"></i>Done
+        </button>
+      `;
+      document.getElementById('booking-modal-body').appendChild(successDiv);
+
+    } catch (err) {
+      bookingError.textContent = err.message;
+      bookingError.classList.remove('d-none');
+    } finally {
+      submitBookingBtn.disabled = false;
+      submitBookingBtn.innerHTML = '<i class="bi bi-check2-circle me-2"></i>Confirm Consultation Request';
+    }
+  });
+  </script>
+
+</body>
+</html>
