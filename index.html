@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AuraMatch Delhi — AI Bridal Makeup Matchmaker</title>
-  <meta name="description" content="Upload your bridal moodboard and let AI match you with Delhi's finest makeup artists. Powered by Groq Llama Vision." />
+  <meta name="description"
+    content="Upload your bridal moodboard and let AI match you with Delhi's finest makeup artists. Powered by Groq Llama Vision." />
 
   <!-- Google Fonts: Playfair Display (serif headers) + Inter (body) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
 
   <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -21,28 +25,34 @@
        DESIGN TOKENS
     ───────────────────────────────────────────────────────── */
     :root {
-      --alabaster:  #FAFAFA;
-      --charcoal:   #1A1A1A;
-      --gold:       #D4AF37;
+      --alabaster: #FAFAFA;
+      --charcoal: #1A1A1A;
+      --gold: #D4AF37;
       --gold-light: #E8CC6A;
-      --gold-dark:  #A88B1D;
-      --warm-grey:  #F3F0EB;
-      --mid-grey:   #9A9A9A;
-      --border:     #E2DDD6;
-      --card-bg:    #FFFFFF;
-      --shadow-sm:  0 2px 12px rgba(26,26,26,.06);
-      --shadow-md:  0 8px 32px rgba(26,26,26,.10);
-      --shadow-lg:  0 20px 60px rgba(26,26,26,.14);
-      --radius:     16px;
-      --transition: .3s cubic-bezier(.4,0,.2,1);
+      --gold-dark: #A88B1D;
+      --warm-grey: #F3F0EB;
+      --mid-grey: #9A9A9A;
+      --border: #E2DDD6;
+      --card-bg: #FFFFFF;
+      --shadow-sm: 0 2px 12px rgba(26, 26, 26, .06);
+      --shadow-md: 0 8px 32px rgba(26, 26, 26, .10);
+      --shadow-lg: 0 20px 60px rgba(26, 26, 26, .14);
+      --radius: 16px;
+      --transition: .3s cubic-bezier(.4, 0, .2, 1);
     }
 
     /* ─────────────────────────────────────────────────────────
        BASE
     ───────────────────────────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
 
-    html { scroll-behavior: smooth; }
+    html {
+      scroll-behavior: smooth;
+    }
 
     body {
       font-family: 'Inter', sans-serif;
@@ -52,7 +62,11 @@
       overflow-x: hidden;
     }
 
-    h1, h2, h3, h4, .serif {
+    h1,
+    h2,
+    h3,
+    h4,
+    .serif {
       font-family: 'Playfair Display', Georgia, serif;
     }
 
@@ -60,7 +74,7 @@
        NAVBAR
     ───────────────────────────────────────────────────────── */
     .am-nav {
-      background: rgba(250,250,250,.88);
+      background: rgba(250, 250, 250, .88);
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
       border-bottom: 1px solid var(--border);
@@ -113,11 +127,21 @@
       display: none;
       animation: fadeUp .45s var(--transition) both;
     }
-    .state-panel.active { display: block; }
+
+    .state-panel.active {
+      display: block;
+    }
 
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(22px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(22px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     /* ─────────────────────────────────────────────────────────
@@ -144,15 +168,25 @@
     }
 
     .hero-kicker .dot {
-      width: 6px; height: 6px;
+      width: 6px;
+      height: 6px;
       background: var(--gold);
       border-radius: 50%;
       animation: pulse 2s ease-in-out infinite;
     }
 
     @keyframes pulse {
-      0%,100% { opacity: 1; transform: scale(1); }
-      50%      { opacity: .5; transform: scale(1.4); }
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: .5;
+        transform: scale(1.4);
+      }
     }
 
     .hero-title {
@@ -194,19 +228,20 @@
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, rgba(212,175,55,.04) 0%, transparent 60%);
+      background: linear-gradient(135deg, rgba(212, 175, 55, .04) 0%, transparent 60%);
       pointer-events: none;
     }
 
     .drop-zone:hover,
     .drop-zone.dragover {
       border-color: var(--gold);
-      background: rgba(212,175,55,.03);
-      box-shadow: 0 0 0 4px rgba(212,175,55,.12), var(--shadow-md);
+      background: rgba(212, 175, 55, .03);
+      box-shadow: 0 0 0 4px rgba(212, 175, 55, .12), var(--shadow-md);
     }
 
     .drop-icon {
-      width: 68px; height: 68px;
+      width: 68px;
+      height: 68px;
       background: linear-gradient(135deg, var(--warm-grey), #EDE9E2);
       border-radius: 50%;
       display: flex;
@@ -238,7 +273,9 @@
       margin-bottom: 1.4rem;
     }
 
-    #file-input { display: none; }
+    #file-input {
+      display: none;
+    }
 
     /* ─── Buttons ─── */
     .btn-gold {
@@ -259,20 +296,24 @@
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, rgba(212,175,55,.15) 0%, rgba(212,175,55,.05) 100%);
+      background: linear-gradient(135deg, rgba(212, 175, 55, .15) 0%, rgba(212, 175, 55, .05) 100%);
       opacity: 0;
       transition: opacity var(--transition);
     }
 
     .btn-gold:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(26,26,26,.25);
+      box-shadow: 0 8px 24px rgba(26, 26, 26, .25);
       color: #fff;
     }
 
-    .btn-gold:hover::after { opacity: 1; }
+    .btn-gold:hover::after {
+      opacity: 1;
+    }
 
-    .btn-gold:active { transform: translateY(0); }
+    .btn-gold:active {
+      transform: translateY(0);
+    }
 
     .btn-outline-gold {
       background: transparent;
@@ -364,12 +405,14 @@
 
     .gold-spinner-wrap {
       position: relative;
-      width: 80px; height: 80px;
+      width: 80px;
+      height: 80px;
       margin: 0 auto 2rem;
     }
 
     .gold-spinner {
-      width: 80px; height: 80px;
+      width: 80px;
+      height: 80px;
       border: 3px solid var(--border);
       border-top-color: var(--gold);
       border-right-color: var(--gold-light);
@@ -379,9 +422,11 @@
 
     .gold-spinner-inner {
       position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%,-50%);
-      width: 48px; height: 48px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 48px;
+      height: 48px;
       border: 2px solid transparent;
       border-top-color: var(--charcoal);
       border-radius: 50%;
@@ -389,7 +434,9 @@
     }
 
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     .processing-title {
@@ -423,12 +470,17 @@
       transition: color .4s;
     }
 
-    .processing-steps li:last-child { border-bottom: none; }
+    .processing-steps li:last-child {
+      border-bottom: none;
+    }
 
     .step-icon {
-      width: 22px; height: 22px;
+      width: 22px;
+      height: 22px;
       border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: .65rem;
       flex-shrink: 0;
       background: var(--warm-grey);
@@ -523,7 +575,8 @@
     }
 
     .ai-tag .tag-dot {
-      width: 5px; height: 5px;
+      width: 5px;
+      height: 5px;
       background: var(--gold);
       border-radius: 50%;
     }
@@ -555,7 +608,7 @@
     .mua-card:hover {
       transform: translateY(-4px);
       box-shadow: var(--shadow-lg);
-      border-color: rgba(212,175,55,.3);
+      border-color: rgba(212, 175, 55, .3);
     }
 
     .mua-card-inner {
@@ -574,9 +627,17 @@
       position: relative;
     }
 
-    .rank-strip.rank-1 { background: linear-gradient(180deg, #F8F2DC 0%, #EFE4AA 100%); }
-    .rank-strip.rank-2 { background: linear-gradient(180deg, #F4F4F4 0%, #E8E8E8 100%); }
-    .rank-strip.rank-3 { background: linear-gradient(180deg, #FDF0E8 0%, #F0D9C8 100%); }
+    .rank-strip.rank-1 {
+      background: linear-gradient(180deg, #F8F2DC 0%, #EFE4AA 100%);
+    }
+
+    .rank-strip.rank-2 {
+      background: linear-gradient(180deg, #F4F4F4 0%, #E8E8E8 100%);
+    }
+
+    .rank-strip.rank-3 {
+      background: linear-gradient(180deg, #FDF0E8 0%, #F0D9C8 100%);
+    }
 
     .rank-number {
       font-family: 'Playfair Display', serif;
@@ -585,9 +646,17 @@
       line-height: 1;
     }
 
-    .rank-strip.rank-1 .rank-number { color: #A88B1D; }
-    .rank-strip.rank-2 .rank-number { color: #888; }
-    .rank-strip.rank-3 .rank-number { color: #A0663A; }
+    .rank-strip.rank-1 .rank-number {
+      color: #A88B1D;
+    }
+
+    .rank-strip.rank-2 .rank-number {
+      color: #888;
+    }
+
+    .rank-strip.rank-3 .rank-number {
+      color: #A0663A;
+    }
 
     .rank-medal {
       font-size: .9rem;
@@ -653,7 +722,7 @@
       height: 100%;
       border-radius: 10px;
       background: linear-gradient(90deg, var(--charcoal), var(--gold));
-      transition: width 1s cubic-bezier(.4,0,.2,1);
+      transition: width 1s cubic-bezier(.4, 0, .2, 1);
     }
 
     .mua-meta {
@@ -676,7 +745,10 @@
       font-weight: 500;
     }
 
-    .meta-chip i { color: var(--gold-dark); font-size: .75rem; }
+    .meta-chip i {
+      color: var(--gold-dark);
+      font-size: .75rem;
+    }
 
     .mua-card-actions {
       display: flex;
@@ -703,26 +775,31 @@
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, rgba(212,175,55,.2), transparent);
+      background: linear-gradient(135deg, rgba(212, 175, 55, .2), transparent);
       opacity: 0;
       transition: opacity var(--transition);
     }
 
     .btn-book:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(26,26,26,.3);
+      box-shadow: 0 6px 20px rgba(26, 26, 26, .3);
       color: #fff;
     }
 
-    .btn-book:hover::after { opacity: 1; }
+    .btn-book:hover::after {
+      opacity: 1;
+    }
 
     .btn-ig {
-      width: 38px; height: 38px;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
       border: 1.5px solid var(--border);
       background: transparent;
       color: var(--charcoal);
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 1rem;
       transition: all var(--transition);
       flex-shrink: 0;
@@ -736,17 +813,21 @@
     }
 
     .btn-call {
-      width: 38px; height: 38px;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
       border: 1.5px solid #28a745;
       background: transparent;
       color: #28a745;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 1rem;
       transition: all var(--transition);
       flex-shrink: 0;
       text-decoration: none;
     }
+
     .btn-call:hover {
       background: #28a745;
       color: #fff;
@@ -760,16 +841,19 @@
       border: 1px solid var(--border);
       box-shadow: var(--shadow-lg);
     }
+
     .modal-header {
       border-bottom: 1px solid var(--border);
       padding: 1.4rem 1.75rem;
     }
+
     .modal-title {
       font-family: 'Playfair Display', serif;
       font-size: 1.2rem;
       font-weight: 700;
       color: var(--charcoal);
     }
+
     .modal-artist-badge {
       display: inline-flex;
       align-items: center;
@@ -783,24 +867,30 @@
       color: var(--gold-dark);
       margin-bottom: 1.2rem;
     }
+
     .form-label {
       font-size: .8rem;
       font-weight: 600;
       color: var(--charcoal);
       letter-spacing: .2px;
     }
-    .form-control, .form-select {
+
+    .form-control,
+    .form-select {
       border: 1.5px solid var(--border);
       border-radius: 10px;
       font-size: .88rem;
       padding: .55rem .85rem;
       transition: border-color var(--transition), box-shadow var(--transition);
     }
-    .form-control:focus, .form-select:focus {
+
+    .form-control:focus,
+    .form-select:focus {
       border-color: var(--gold);
-      box-shadow: 0 0 0 3px rgba(212,175,55,.15);
+      box-shadow: 0 0 0 3px rgba(212, 175, 55, .15);
       outline: none;
     }
+
     .modal-phone-strip {
       display: flex;
       align-items: center;
@@ -811,20 +901,30 @@
       padding: .7rem 1rem;
       margin-bottom: 1rem;
     }
-    .modal-phone-strip i { color: #16a34a; font-size: 1.1rem; }
+
+    .modal-phone-strip i {
+      color: #16a34a;
+      font-size: 1.1rem;
+    }
+
     .modal-phone-strip .ph-num {
       font-weight: 600;
       font-size: .9rem;
       color: var(--charcoal);
       flex: 1;
     }
+
     .modal-phone-strip a {
       font-size: .8rem;
       font-weight: 600;
       color: #16a34a;
       text-decoration: none;
     }
-    .modal-phone-strip a:hover { text-decoration: underline; }
+
+    .modal-phone-strip a:hover {
+      text-decoration: underline;
+    }
+
     .btn-submit-book {
       background: linear-gradient(135deg, var(--charcoal), #2d2d2d);
       color: #fff;
@@ -838,28 +938,42 @@
       position: relative;
       overflow: hidden;
     }
+
     .btn-submit-book::after {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, rgba(212,175,55,.18), transparent);
+      background: linear-gradient(135deg, rgba(212, 175, 55, .18), transparent);
       opacity: 0;
       transition: opacity var(--transition);
     }
-    .btn-submit-book:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(26,26,26,.25); }
-    .btn-submit-book:hover::after { opacity: 1; }
+
+    .btn-submit-book:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(26, 26, 26, .25);
+    }
+
+    .btn-submit-book:hover::after {
+      opacity: 1;
+    }
+
     .booking-success {
       text-align: center;
       padding: 1.5rem 0 .5rem;
     }
+
     .booking-success .success-icon {
-      width: 68px; height: 68px;
+      width: 68px;
+      height: 68px;
       background: linear-gradient(135deg, #D4EDDA, #A8D5B5);
       border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 1.8rem;
       margin: 0 auto 1.2rem;
     }
+
     .booking-success h5 {
       font-family: 'Playfair Display', serif;
       font-size: 1.3rem;
@@ -867,7 +981,12 @@
       color: var(--charcoal);
       margin-bottom: .5rem;
     }
-    .booking-success p { font-size: .88rem; color: var(--mid-grey); line-height: 1.6; }
+
+    .booking-success p {
+      font-size: .88rem;
+      color: var(--mid-grey);
+      line-height: 1.6;
+    }
 
     /* ─── Try Again button ─── */
     .try-again-wrap {
@@ -886,28 +1005,61 @@
       color: var(--mid-grey);
     }
 
-    .am-footer strong { color: var(--charcoal); }
+    .am-footer strong {
+      color: var(--charcoal);
+    }
 
     /* ─────────────────────────────────────────────────────────
        RESPONSIVE
     ───────────────────────────────────────────────────────── */
     @media (max-width: 768px) {
-      .hero-section { padding: 3.5rem 0 2rem; }
-      .hero-title { font-size: 2.2rem; }
-      .drop-zone { padding: 2.2rem 1.2rem; }
-      .processing-card { padding: 2.8rem 1.5rem; }
-      .results-section { padding: 2rem 0 3rem; }
-      .mua-card-inner { flex-direction: column; }
-      .rank-strip { width: 100%; flex-direction: row; padding: .6rem 1rem; gap: .4rem; }
-      .preview-card { position: static; }
+      .hero-section {
+        padding: 3.5rem 0 2rem;
+      }
+
+      .hero-title {
+        font-size: 2.2rem;
+      }
+
+      .drop-zone {
+        padding: 2.2rem 1.2rem;
+      }
+
+      .processing-card {
+        padding: 2.8rem 1.5rem;
+      }
+
+      .results-section {
+        padding: 2rem 0 3rem;
+      }
+
+      .mua-card-inner {
+        flex-direction: column;
+      }
+
+      .rank-strip {
+        width: 100%;
+        flex-direction: row;
+        padding: .6rem 1rem;
+        gap: .4rem;
+      }
+
+      .preview-card {
+        position: static;
+      }
     }
 
     /* ─────────────────────────────────────────────────────────
        SKELETON SHIMMER (before results render)
     ───────────────────────────────────────────────────────── */
     @keyframes shimmer {
-      0%   { background-position: -400px 0; }
-      100% { background-position: 400px 0; }
+      0% {
+        background-position: -400px 0;
+      }
+
+      100% {
+        background-position: 400px 0;
+      }
     }
 
     .shimmer {
@@ -969,13 +1121,8 @@
 
             <!-- Right: drop zone -->
             <div class="col-lg-7">
-              <div
-                id="drop-zone"
-                class="drop-zone"
-                role="button"
-                aria-label="Upload bridal moodboard image"
-                tabindex="0"
-              >
+              <div id="drop-zone" class="drop-zone" role="button" aria-label="Upload bridal moodboard image"
+                tabindex="0">
                 <div class="drop-icon">
                   <i class="bi bi-image-fill"></i>
                 </div>
@@ -983,11 +1130,7 @@
                 <div class="drop-sub">
                   Drag &amp; drop, or click to browse
                 </div>
-                <button
-                  id="browse-btn"
-                  class="btn btn-gold px-4"
-                  type="button"
-                >
+                <button id="browse-btn" class="btn btn-gold px-4" type="button">
                   <i class="bi bi-upload me-2"></i>Choose Photo
                 </button>
                 <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" />
@@ -1143,14 +1286,12 @@
 
             <div class="mb-3">
               <label for="client-name" class="form-label">Your Full Name *</label>
-              <input type="text" class="form-control" id="client-name"
-                placeholder="e.g. Riya Kapoor" required />
+              <input type="text" class="form-control" id="client-name" placeholder="e.g. Riya Kapoor" required />
             </div>
 
             <div class="mb-3">
               <label for="client-phone" class="form-label">Your Phone Number *</label>
-              <input type="tel" class="form-control" id="client-phone"
-                placeholder="+91 98765 00000" required />
+              <input type="tel" class="form-control" id="client-phone" placeholder="+91 98765 00000" required />
             </div>
 
             <div class="mb-3">
@@ -1159,7 +1300,8 @@
             </div>
 
             <div class="mb-4">
-              <label for="booking-message" class="form-label">Message <span style="color:var(--mid-grey);font-weight:400;">(optional)</span></label>
+              <label for="booking-message" class="form-label">Message <span
+                  style="color:var(--mid-grey);font-weight:400;">(optional)</span></label>
               <textarea class="form-control" id="booking-message" rows="2"
                 placeholder="e.g. Looking for a dewy, soft-glam bridal look for my November wedding."></textarea>
             </div>
@@ -1189,212 +1331,212 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-  /* ═══════════════════════════════════════════════════════════
-     AURAMATCH DELHI — APP LOGIC
-     Three states: landing → processing → results
-  ═══════════════════════════════════════════════════════════ */
+    /* ═══════════════════════════════════════════════════════════
+       AURAMATCH DELHI — APP LOGIC
+       Three states: landing → processing → results
+    ═══════════════════════════════════════════════════════════ */
 
-  const API_BASE = 'http://127.0.0.1:5000';
+    const API_BASE = 'https://auramatch-oz0z.onrender.com';
 
-  // ── DOM refs ───────────────────────────────────────────────
-  const panels = {
-    landing:    document.getElementById('state-landing'),
-    processing: document.getElementById('state-processing'),
-    results:    document.getElementById('state-results'),
-  };
-
-  const dropZone         = document.getElementById('drop-zone');
-  const fileInput        = document.getElementById('file-input');
-  const browseBtn        = document.getElementById('browse-btn');
-  const previewImage     = document.getElementById('preview-image');
-  const aiTagsContainer  = document.getElementById('ai-tags-container');
-  const muaCardsContainer= document.getElementById('mua-cards-container');
-  const fallbackNotice   = document.getElementById('fallback-notice');
-  const tryAgainBtn      = document.getElementById('try-again-btn');
-  const navBrandLink     = document.getElementById('nav-brand-link');
-
-  // Processing step icons
-  const stepIcons = [1,2,3,4].map(n => document.getElementById(`step-icon-${n}`));
-
-  // ── State machine ──────────────────────────────────────────
-  function showState(name) {
-    Object.entries(panels).forEach(([key, el]) => {
-      el.classList.toggle('active', key === name);
-    });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  // ── Drag & Drop wiring ─────────────────────────────────────
-  dropZone.addEventListener('dragover', e => {
-    e.preventDefault();
-    dropZone.classList.add('dragover');
-  });
-  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-  dropZone.addEventListener('drop', e => {
-    e.preventDefault();
-    dropZone.classList.remove('dragover');
-    const file = e.dataTransfer.files[0];
-    if (file) handleFile(file);
-  });
-
-  // Click to browse
-  browseBtn.addEventListener('click', e => {
-    e.stopPropagation();
-    fileInput.click();
-  });
-  dropZone.addEventListener('click', () => fileInput.click());
-  dropZone.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
-  });
-  fileInput.addEventListener('change', () => {
-    if (fileInput.files[0]) handleFile(fileInput.files[0]);
-    fileInput.value = ''; // reset so same file can be reselected
-  });
-
-  // Reset
-  tryAgainBtn.addEventListener('click', () => showState('landing'));
-  navBrandLink.addEventListener('click', e => { e.preventDefault(); showState('landing'); });
-
-  // ── Processing step animation ──────────────────────────────
-  let stepTimer = null;
-
-  function animateSteps() {
-    let step = 0;
-    stepIcons.forEach(icon => {
-      icon.classList.remove('done');
-      icon.innerHTML = icon.querySelector('i')
-        ? icon.innerHTML
-        : '<i class="bi bi-circle"></i>';
-    });
-
-    const delays = [400, 1200, 2200, 3100];
-
-    stepTimer = delays.forEach((delay, i) => {
-      setTimeout(() => {
-        if (panels.processing.classList.contains('active')) {
-          stepIcons[i].classList.add('done');
-          stepIcons[i].innerHTML = '<i class="bi bi-check-lg"></i>';
-        }
-      }, delay);
-    });
-  }
-
-  // ── File → base64 → API call ──────────────────────────────
-  function handleFile(file) {
-    if (!file.type.startsWith('image/')) {
-      alert('Please upload an image file (JPG, PNG, or WEBP).');
-      return;
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      alert('File is too large. Please use an image under 10 MB.');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const dataUrl = e.target.result;                  // full data URL
-      const base64  = dataUrl.split(',')[1];            // strip MIME prefix
-
-      // Show preview image immediately
-      previewImage.src = dataUrl;
-
-      // Transition to processing state
-      showState('processing');
-      animateSteps();
-
-      // Call the Flask API
-      try {
-        const response = await fetch(`${API_BASE}/api/match`, {
-          method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({ image: base64 }),
-        });
-
-        if (!response.ok) {
-          const err = await response.json().catch(() => ({}));
-          throw new Error(err.error || `Server error ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        // Small delay so users see step 4 tick before results
-        setTimeout(() => renderResults(data), 700);
-
-      } catch (err) {
-        console.error('API error:', err);
-        setTimeout(() => {
-          alert(`Something went wrong: ${err.message}\n\nMake sure the Flask backend is running on port 5000.`);
-          showState('landing');
-        }, 500);
-      }
+    // ── DOM refs ───────────────────────────────────────────────
+    const panels = {
+      landing: document.getElementById('state-landing'),
+      processing: document.getElementById('state-processing'),
+      results: document.getElementById('state-results'),
     };
 
-    reader.readAsDataURL(file);
-  }
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const browseBtn = document.getElementById('browse-btn');
+    const previewImage = document.getElementById('preview-image');
+    const aiTagsContainer = document.getElementById('ai-tags-container');
+    const muaCardsContainer = document.getElementById('mua-cards-container');
+    const fallbackNotice = document.getElementById('fallback-notice');
+    const tryAgainBtn = document.getElementById('try-again-btn');
+    const navBrandLink = document.getElementById('nav-brand-link');
 
-  // ── Render results ─────────────────────────────────────────
-  function renderResults(data) {
-    // AI tags
-    aiTagsContainer.innerHTML = '';
-    (data.ai_tags || []).forEach(tag => {
-      const span = document.createElement('span');
-      span.className = 'ai-tag';
-      span.innerHTML = `<span class="tag-dot"></span>${tag}`;
-      aiTagsContainer.appendChild(span);
-    });
+    // Processing step icons
+    const stepIcons = [1, 2, 3, 4].map(n => document.getElementById(`step-icon-${n}`));
 
-    // Fallback notice
-    if (data.fallback) {
-      fallbackNotice.classList.remove('d-none');
-    } else {
-      fallbackNotice.classList.add('d-none');
+    // ── State machine ──────────────────────────────────────────
+    function showState(name) {
+      Object.entries(panels).forEach(([key, el]) => {
+        el.classList.toggle('active', key === name);
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // MUA cards
-    muaCardsContainer.innerHTML = '';
-    const results = data.results || [];
+    // ── Drag & Drop wiring ─────────────────────────────────────
+    dropZone.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (file) handleFile(file);
+    });
 
-    if (results.length === 0) {
-      muaCardsContainer.innerHTML = `
+    // Click to browse
+    browseBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      fileInput.click();
+    });
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+    });
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files[0]) handleFile(fileInput.files[0]);
+      fileInput.value = ''; // reset so same file can be reselected
+    });
+
+    // Reset
+    tryAgainBtn.addEventListener('click', () => showState('landing'));
+    navBrandLink.addEventListener('click', e => { e.preventDefault(); showState('landing'); });
+
+    // ── Processing step animation ──────────────────────────────
+    let stepTimer = null;
+
+    function animateSteps() {
+      let step = 0;
+      stepIcons.forEach(icon => {
+        icon.classList.remove('done');
+        icon.innerHTML = icon.querySelector('i')
+          ? icon.innerHTML
+          : '<i class="bi bi-circle"></i>';
+      });
+
+      const delays = [400, 1200, 2200, 3100];
+
+      stepTimer = delays.forEach((delay, i) => {
+        setTimeout(() => {
+          if (panels.processing.classList.contains('active')) {
+            stepIcons[i].classList.add('done');
+            stepIcons[i].innerHTML = '<i class="bi bi-check-lg"></i>';
+          }
+        }, delay);
+      });
+    }
+
+    // ── File → base64 → API call ──────────────────────────────
+    function handleFile(file) {
+      if (!file.type.startsWith('image/')) {
+        alert('Please upload an image file (JPG, PNG, or WEBP).');
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        alert('File is too large. Please use an image under 10 MB.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const dataUrl = e.target.result;                  // full data URL
+        const base64 = dataUrl.split(',')[1];            // strip MIME prefix
+
+        // Show preview image immediately
+        previewImage.src = dataUrl;
+
+        // Transition to processing state
+        showState('processing');
+        animateSteps();
+
+        // Call the Flask API
+        try {
+          const response = await fetch(`${API_BASE}/api/match`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: base64 }),
+          });
+
+          if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.error || `Server error ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          // Small delay so users see step 4 tick before results
+          setTimeout(() => renderResults(data), 700);
+
+        } catch (err) {
+          console.error('API error:', err);
+          setTimeout(() => {
+            alert(`Something went wrong: ${err.message}\n\nMake sure the Flask backend is running on port 5000.`);
+            showState('landing');
+          }, 500);
+        }
+      };
+
+      reader.readAsDataURL(file);
+    }
+
+    // ── Render results ─────────────────────────────────────────
+    function renderResults(data) {
+      // AI tags
+      aiTagsContainer.innerHTML = '';
+      (data.ai_tags || []).forEach(tag => {
+        const span = document.createElement('span');
+        span.className = 'ai-tag';
+        span.innerHTML = `<span class="tag-dot"></span>${tag}`;
+        aiTagsContainer.appendChild(span);
+      });
+
+      // Fallback notice
+      if (data.fallback) {
+        fallbackNotice.classList.remove('d-none');
+      } else {
+        fallbackNotice.classList.add('d-none');
+      }
+
+      // MUA cards
+      muaCardsContainer.innerHTML = '';
+      const results = data.results || [];
+
+      if (results.length === 0) {
+        muaCardsContainer.innerHTML = `
         <div class="text-center py-5" style="color:var(--mid-grey);">
           <i class="bi bi-emoji-neutral" style="font-size:2.5rem;"></i>
           <p class="mt-3">No matching artists found. Try seeding the database first.</p>
         </div>`;
-    } else {
-      results.forEach((artist, idx) => {
-        muaCardsContainer.appendChild(buildMuaCard(artist, idx + 1));
+      } else {
+        results.forEach((artist, idx) => {
+          muaCardsContainer.appendChild(buildMuaCard(artist, idx + 1));
+        });
+      }
+
+      // Show results state
+      showState('results');
+
+      // Animate match bars after DOM paint
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          document.querySelectorAll('.match-bar-fill').forEach(bar => {
+            bar.style.width = bar.dataset.pct + '%';
+          });
+        });
       });
     }
 
-    // Show results state
-    showState('results');
+    // ── Build a single MUA card ────────────────────────────────
+    function buildMuaCard(artist, rank) {
+      const medals = ['🥇', '🥈', '🥉'];
+      const score = artist.match_score ?? 0;
+      const barPct = Math.min(score, 100);
 
-    // Animate match bars after DOM paint
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        document.querySelectorAll('.match-bar-fill').forEach(bar => {
-          bar.style.width = bar.dataset.pct + '%';
-        });
-      });
-    });
-  }
+      const card = document.createElement('div');
+      card.className = 'mua-card';
 
-  // ── Build a single MUA card ────────────────────────────────
-  function buildMuaCard(artist, rank) {
-    const medals  = ['🥇','🥈','🥉'];
-    const score   = artist.match_score ?? 0;
-    const barPct  = Math.min(score, 100);
+      // Style tags chips (show first 3)
+      const tagChips = (artist.style_tags || [])
+        .slice(0, 4)
+        .map(t => `<span class="ai-tag" style="font-size:.73rem;padding:.2rem .7rem;">${t}</span>`)
+        .join('');
 
-    const card = document.createElement('div');
-    card.className = 'mua-card';
-
-    // Style tags chips (show first 3)
-    const tagChips = (artist.style_tags || [])
-      .slice(0, 4)
-      .map(t => `<span class="ai-tag" style="font-size:.73rem;padding:.2rem .7rem;">${t}</span>`)
-      .join('');
-
-    card.innerHTML = `
+      card.innerHTML = `
       <div class="mua-card-inner">
 
         <!-- Rank strip -->
@@ -1457,7 +1599,7 @@
               <i class="bi bi-calendar-check me-1"></i>Book Consultation
             </button>
             <a
-              href="tel:${escHtml((artist.phone || '').replace(/\s/g,''))}"
+              href="tel:${escHtml((artist.phone || '').replace(/\s/g, ''))}"
               class="btn-call"
               aria-label="Call ${escHtml(artist.name)}"
               title="Call: ${escHtml(artist.phone || '')}"
@@ -1466,7 +1608,7 @@
               <i class="bi bi-telephone-fill"></i>
             </a>
             <a
-              href="https://instagram.com/${escHtml(artist.instagram.replace('@',''))}"
+              href="https://instagram.com/${escHtml(artist.instagram.replace('@', ''))}"
               target="_blank"
               rel="noopener"
               class="btn-ig"
@@ -1481,112 +1623,112 @@
       </div><!-- /mua-card-inner -->
     `;
 
-    return card;
-  }
-
-  // ── XSS guard ──────────────────────────────────────────────
-  function escHtml(str) {
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
-
-  // ── Initial state ──────────────────────────────────────────
-  showState('landing');
-
-  // ── Booking modal logic ────────────────────────────────────
-  const bookingModal    = new bootstrap.Modal(document.getElementById('bookingModal'));
-  const bookingForm     = document.getElementById('booking-form');
-  const bookingError    = document.getElementById('booking-form-error');
-  const submitBookingBtn= document.getElementById('submit-booking-btn');
-
-  // Set tomorrow as the minimum bookable date
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  document.getElementById('preferred-date').min = tomorrow.toISOString().split('T')[0];
-
-  function openBookingModal(btn) {
-    const artistId   = btn.dataset.artistId;
-    const artistName = btn.dataset.artistName;
-    const artistPhone= btn.dataset.artistPhone;
-
-    document.getElementById('booking-artist-id').value   = artistId;
-    document.getElementById('modal-artist-name').textContent = artistName;
-    document.getElementById('modal-artist-phone').textContent = artistPhone || 'Not available';
-
-    const callLink = document.getElementById('modal-call-link');
-    if (artistPhone) {
-      callLink.href = 'tel:' + artistPhone.replace(/\s/g, '');
-      callLink.style.display = '';
-    } else {
-      callLink.style.display = 'none';
+      return card;
     }
 
-    // Reset form
-    bookingForm.reset();
-    bookingError.classList.add('d-none');
-    bookingError.textContent = '';
-    showBookingForm();
-    bookingModal.show();
-  }
-
-  function showBookingForm() {
-    document.getElementById('booking-form').style.display = '';
-    const success = document.getElementById('booking-success-view');
-    if (success) success.remove();
-  }
-
-  bookingForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    bookingError.classList.add('d-none');
-
-    const artistId     = document.getElementById('booking-artist-id').value;
-    const clientName   = document.getElementById('client-name').value.trim();
-    const clientPhone  = document.getElementById('client-phone').value.trim();
-    const preferredDate= document.getElementById('preferred-date').value;
-    const message      = document.getElementById('booking-message').value.trim();
-
-    if (!clientName || !clientPhone || !preferredDate) {
-      bookingError.textContent = 'Please fill in all required fields.';
-      bookingError.classList.remove('d-none');
-      return;
+    // ── XSS guard ──────────────────────────────────────────────
+    function escHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
-    submitBookingBtn.disabled = true;
-    submitBookingBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Booking...';
+    // ── Initial state ──────────────────────────────────────────
+    showState('landing');
 
-    try {
-      const res = await fetch(`${API_BASE}/api/book`, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          artist_id:      parseInt(artistId),
-          client_name:    clientName,
-          client_phone:   clientPhone,
-          preferred_date: preferredDate,
-          message,
-        }),
-      });
+    // ── Booking modal logic ────────────────────────────────────
+    const bookingModal = new bootstrap.Modal(document.getElementById('bookingModal'));
+    const bookingForm = document.getElementById('booking-form');
+    const bookingError = document.getElementById('booking-form-error');
+    const submitBookingBtn = document.getElementById('submit-booking-btn');
 
-      const data = await res.json();
+    // Set tomorrow as the minimum bookable date
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    document.getElementById('preferred-date').min = tomorrow.toISOString().split('T')[0];
 
-      if (!res.ok) throw new Error(data.error || 'Booking failed.');
+    function openBookingModal(btn) {
+      const artistId = btn.dataset.artistId;
+      const artistName = btn.dataset.artistName;
+      const artistPhone = btn.dataset.artistPhone;
 
-      // Show success view inside modal body
-      const artistName = document.getElementById('modal-artist-name').textContent;
-      const artistPhone = document.getElementById('modal-artist-phone').textContent;
-      const formattedDate = new Date(preferredDate + 'T00:00:00').toLocaleDateString('en-IN', {
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-      });
+      document.getElementById('booking-artist-id').value = artistId;
+      document.getElementById('modal-artist-name').textContent = artistName;
+      document.getElementById('modal-artist-phone').textContent = artistPhone || 'Not available';
 
-      bookingForm.style.display = 'none';
-      const successDiv = document.createElement('div');
-      successDiv.id = 'booking-success-view';
-      successDiv.className = 'booking-success';
-      successDiv.innerHTML = `
+      const callLink = document.getElementById('modal-call-link');
+      if (artistPhone) {
+        callLink.href = 'tel:' + artistPhone.replace(/\s/g, '');
+        callLink.style.display = '';
+      } else {
+        callLink.style.display = 'none';
+      }
+
+      // Reset form
+      bookingForm.reset();
+      bookingError.classList.add('d-none');
+      bookingError.textContent = '';
+      showBookingForm();
+      bookingModal.show();
+    }
+
+    function showBookingForm() {
+      document.getElementById('booking-form').style.display = '';
+      const success = document.getElementById('booking-success-view');
+      if (success) success.remove();
+    }
+
+    bookingForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      bookingError.classList.add('d-none');
+
+      const artistId = document.getElementById('booking-artist-id').value;
+      const clientName = document.getElementById('client-name').value.trim();
+      const clientPhone = document.getElementById('client-phone').value.trim();
+      const preferredDate = document.getElementById('preferred-date').value;
+      const message = document.getElementById('booking-message').value.trim();
+
+      if (!clientName || !clientPhone || !preferredDate) {
+        bookingError.textContent = 'Please fill in all required fields.';
+        bookingError.classList.remove('d-none');
+        return;
+      }
+
+      submitBookingBtn.disabled = true;
+      submitBookingBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Booking...';
+
+      try {
+        const res = await fetch(`${API_BASE}/api/book`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            artist_id: parseInt(artistId),
+            client_name: clientName,
+            client_phone: clientPhone,
+            preferred_date: preferredDate,
+            message,
+          }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error || 'Booking failed.');
+
+        // Show success view inside modal body
+        const artistName = document.getElementById('modal-artist-name').textContent;
+        const artistPhone = document.getElementById('modal-artist-phone').textContent;
+        const formattedDate = new Date(preferredDate + 'T00:00:00').toLocaleDateString('en-IN', {
+          weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+        });
+
+        bookingForm.style.display = 'none';
+        const successDiv = document.createElement('div');
+        successDiv.id = 'booking-success-view';
+        successDiv.className = 'booking-success';
+        successDiv.innerHTML = `
         <div class="success-icon">✅</div>
         <h5>Consultation Requested!</h5>
         <p>
@@ -1596,7 +1738,7 @@
         <div class="modal-phone-strip mt-3">
           <i class="bi bi-telephone-fill"></i>
           <span class="ph-num">${escHtml(artistPhone)}</span>
-          <a href="tel:${escHtml(artistPhone.replace(/\s/g,''))}">📞 Call Now</a>
+          <a href="tel:${escHtml(artistPhone.replace(/\s/g, ''))}">📞 Call Now</a>
         </div>
         <p class="mt-3" style="font-size:.8rem;color:var(--mid-grey);">
           The artist will contact you on <strong>${escHtml(clientPhone)}</strong> to confirm.
@@ -1605,17 +1747,18 @@
           <i class="bi bi-check-lg me-2"></i>Done
         </button>
       `;
-      document.getElementById('booking-modal-body').appendChild(successDiv);
+        document.getElementById('booking-modal-body').appendChild(successDiv);
 
-    } catch (err) {
-      bookingError.textContent = err.message;
-      bookingError.classList.remove('d-none');
-    } finally {
-      submitBookingBtn.disabled = false;
-      submitBookingBtn.innerHTML = '<i class="bi bi-check2-circle me-2"></i>Confirm Consultation Request';
-    }
-  });
+      } catch (err) {
+        bookingError.textContent = err.message;
+        bookingError.classList.remove('d-none');
+      } finally {
+        submitBookingBtn.disabled = false;
+        submitBookingBtn.innerHTML = '<i class="bi bi-check2-circle me-2"></i>Confirm Consultation Request';
+      }
+    });
   </script>
 
 </body>
+
 </html>
