@@ -460,6 +460,16 @@ def health():
 
 with app.app_context():
     db.create_all()
+    # Auto-seed if the database is empty (e.g. after a Render spin-down or rebuild)
+    try:
+        if not MakeupArtist.query.first():
+            app.logger.info("Database is empty. Auto-seeding 5 bridal artists...")
+            for data in SEED_ARTISTS:
+                db.session.add(MakeupArtist(**data))
+            db.session.commit()
+            app.logger.info("Auto-seeding complete.")
+    except Exception as e:
+        app.logger.error("Failed to auto-seed database: %s", e)
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
