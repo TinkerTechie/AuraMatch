@@ -287,7 +287,7 @@ Sorted desc → top 3 returned with match_score field
 
 ## 🤝 Team
 
-Built for **[Hackathon Name]** · Delhi, 2026
+Built for **Beauty Salon Marketplace Challenge** · Delhi, 2026
 
 ---
 
