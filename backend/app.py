@@ -2,15 +2,21 @@
 AuraMatch Delhi — Flask Backend
 ================================
 Serves makeup artist data from an SQLite database via a REST API.
+Includes JWT-based auth with two roles: 'customer' and 'owner'.
 """
 
 import json
 import os
 import re
+import hmac
+import hashlib
+import base64 as _b64
+from datetime import datetime, timezone, timedelta
+from functools import wraps
+
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from sqlalchemy import text
 from groq import Groq
 from groq import APITimeoutError, APIError
 
@@ -20,23 +26,124 @@ from groq import APITimeoutError, APIError
 
 app = Flask(__name__)
 
-# Allow all origins so the frontend SPA can freely communicate during dev.
-# Tighten this in production by specifying origins=["http://localhost:5173"].
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///auramatch.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
+# Secret used to sign tokens — override in production via env var
+JWT_SECRET = os.environ.get("JWT_SECRET", "auramatch-dev-secret-change-in-prod")
+
 db = SQLAlchemy(app)
 
 
 # ---------------------------------------------------------------------------
-# Model
+# Minimal JWT helpers (no extra library needed)
 # ---------------------------------------------------------------------------
+
+def _b64url_encode(data: bytes) -> str:
+    return _b64.urlsafe_b64encode(data).rstrip(b"=").decode()
+
+
+def _b64url_decode(s: str) -> bytes:
+    padding = 4 - len(s) % 4
+    return _b64.urlsafe_b64decode(s + "=" * (padding % 4))
+
+
+def create_token(payload: dict, expires_in_hours: int = 72) -> str:
+    header = _b64url_encode(json.dumps({"alg": "HS256", "typ": "JWT"}).encode())
+    payload = dict(payload)
+    payload["exp"] = (datetime.now(timezone.utc) + timedelta(hours=expires_in_hours)).timestamp()
+    body = _b64url_encode(json.dumps(payload).encode())
+    sig_input = f"{header}.{body}".encode()
+    sig = _b64url_encode(hmac.new(JWT_SECRET.encode(), sig_input, hashlib.sha256).digest())
+    return f"{header}.{body}.{sig}"
+
+
+def verify_token(token: str) -> dict | None:
+    try:
+        parts = token.split(".")
+        if len(parts) != 3:
+            return None
+        header, body, sig = parts
+        sig_input = f"{header}.{body}".encode()
+        expected_sig = _b64url_encode(hmac.new(JWT_SECRET.encode(), sig_input, hashlib.sha256).digest())
+        if not hmac.compare_digest(sig, expected_sig):
+            return None
+        payload = json.loads(_b64url_decode(body))
+        if payload.get("exp", 0) < datetime.now(timezone.utc).timestamp():
+            return None
+        return payload
+    except Exception:
+        return None
+
+
+def _hash_password(password: str) -> str:
+    salt = os.urandom(16)
+    dk = hashlib.pbkdf2_hmac("sha256", password.encode(), salt, 200_000)
+    return _b64.b64encode(salt + dk).decode()
+
+
+def _check_password(password: str, stored: str) -> bool:
+    raw = _b64.b64decode(stored.encode())
+    salt, dk = raw[:16], raw[16:]
+    return hmac.compare_digest(
+        dk,
+        hashlib.pbkdf2_hmac("sha256", password.encode(), salt, 200_000)
+    )
+
+
+# ---------------------------------------------------------------------------
+# Auth decorator
+# ---------------------------------------------------------------------------
+
+def login_required(roles=None):
+    """Decorator that verifies JWT and optionally restricts to certain roles."""
+    def decorator(f):
+        @wraps(f)
+        def wrapped(*args, **kwargs):
+            auth = request.headers.get("Authorization", "")
+            if not auth.startswith("Bearer "):
+                return jsonify({"error": "Authentication required."}), 401
+            token = auth.split(" ", 1)[1]
+            payload = verify_token(token)
+            if payload is None:
+                return jsonify({"error": "Invalid or expired token."}), 401
+            if roles and payload.get("role") not in roles:
+                return jsonify({"error": "You do not have permission for this action."}), 403
+            request.current_user = payload
+            return f(*args, **kwargs)
+        return wrapped
+    return decorator
+
+
+# ---------------------------------------------------------------------------
+# Models
+# ---------------------------------------------------------------------------
+
+class User(db.Model):
+    """Application user — either a customer or a salon owner."""
+    __tablename__ = "users"
+
+    id           = db.Column(db.Integer, primary_key=True)
+    name         = db.Column(db.String(120), nullable=False)
+    email        = db.Column(db.String(180), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
+    role         = db.Column(db.String(20),  nullable=False, default="customer")  # "customer" | "owner"
+    created_at   = db.Column(db.String(30),  nullable=False)
+
+    def to_dict(self):
+        return {
+            "id":         self.id,
+            "name":       self.name,
+            "email":      self.email,
+            "role":       self.role,
+            "created_at": self.created_at,
+        }
+
 
 class MakeupArtist(db.Model):
     """Represents a bridal makeup artist listed on AuraMatch Delhi."""
-
     __tablename__ = "makeup_artists"
 
     id             = db.Column(db.Integer, primary_key=True)
@@ -46,9 +153,9 @@ class MakeupArtist(db.Model):
     instagram      = db.Column(db.String(120), nullable=False)
     portfolio_url  = db.Column(db.String(255), nullable=False)
     phone          = db.Column(db.String(20),  nullable=False, default="")
-    # SQLite doesn't have a native JSON column, but SQLAlchemy's JSON type
-    # transparently serialises/deserialises Python lists for us.
     style_tags     = db.Column(db.JSON, nullable=False, default=list)
+    # owner link (optional — NULL for seeded artists)
+    owner_id       = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
 
     def to_dict(self):
         return {
@@ -60,20 +167,17 @@ class MakeupArtist(db.Model):
             "portfolio_url":  self.portfolio_url,
             "phone":          self.phone,
             "style_tags":     self.style_tags,
+            "owner_id":       self.owner_id,
         }
 
 
-# ---------------------------------------------------------------------------
-# Booking model
-# ---------------------------------------------------------------------------
-
 class Booking(db.Model):
     """A consultation request submitted through the AuraMatch app."""
-
     __tablename__ = "bookings"
 
     id             = db.Column(db.Integer, primary_key=True)
     artist_id      = db.Column(db.Integer, db.ForeignKey("makeup_artists.id"), nullable=False)
+    user_id        = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)   # NULL for anon/legacy
     client_name    = db.Column(db.String(120), nullable=False)
     client_phone   = db.Column(db.String(20),  nullable=False)
     preferred_date = db.Column(db.String(30),  nullable=False)
@@ -81,12 +185,15 @@ class Booking(db.Model):
     created_at     = db.Column(db.String(30),  nullable=False)
 
     artist = db.relationship("MakeupArtist", backref="bookings")
+    user   = db.relationship("User", backref="bookings")
 
     def to_dict(self):
         return {
             "id":             self.id,
             "artist_id":      self.artist_id,
             "artist_name":    self.artist.name if self.artist else "",
+            "artist_phone":   self.artist.phone if self.artist else "",
+            "user_id":        self.user_id,
             "client_name":    self.client_name,
             "client_phone":   self.client_phone,
             "preferred_date": self.preferred_date,
@@ -96,7 +203,7 @@ class Booking(db.Model):
 
 
 # ---------------------------------------------------------------------------
-# Seed data — 5 highly specific Delhi bridal makeup artists
+# Seed data
 # ---------------------------------------------------------------------------
 
 SEED_ARTISTS = [
@@ -149,10 +256,9 @@ SEED_ARTISTS = [
 
 
 # ---------------------------------------------------------------------------
-# Groq client (key read from GROQ_API_KEY env var)
+# Groq client
 # ---------------------------------------------------------------------------
 
-# Initialised lazily so the server still starts without a key during dev.
 _groq_client: Groq | None = None
 
 def get_groq_client() -> Groq:
@@ -169,7 +275,6 @@ def get_groq_client() -> Groq:
 # Vision helpers
 # ---------------------------------------------------------------------------
 
-# The closed dictionary the AI must pick from.
 VALID_TAGS: list[str] = [
     "dewy", "pastel", "minimalist eye", "nude lip", "hd makeup",
     "bold glam", "smokey eye", "matte finish", "red lip", "airbrush",
@@ -185,21 +290,14 @@ VISION_SYSTEM_PROMPT = (
     "natural, winged liner]. Output raw JSON only."
 )
 
-# Fallback tags returned when Groq is unreachable or times out.
 FALLBACK_TAGS: list[str] = ["traditional", "heavy contour", "matte finish", "airbrush", "dewy"]
 
 
 def _extract_tags_from_image(base64_image: str) -> list[str]:
-    """
-    Send the base64 image to Groq Vision and parse the returned JSON.
-    Returns a list of exactly 5 tag strings.
-    Raises RuntimeError if the response cannot be parsed.
-    """
     client = get_groq_client()
-
     response = client.chat.completions.create(
         model="meta-llama/llama-4-scout-17b-16e-instruct",
-        timeout=20,          # seconds — triggers APITimeoutError on breach
+        timeout=20,
         messages=[
             {"role": "system", "content": VISION_SYSTEM_PROMPT},
             {
@@ -209,7 +307,7 @@ def _extract_tags_from_image(base64_image: str) -> list[str]:
                         "type": "image_url",
                         "image_url": {
                             "url": f"data:image/jpeg;base64,{base64_image}",
-                            "detail": "low",   # cheaper & faster for tag extraction
+                            "detail": "low",
                         },
                     }
                 ],
@@ -217,43 +315,26 @@ def _extract_tags_from_image(base64_image: str) -> list[str]:
         ],
         max_tokens=120,
     )
-
     raw = response.choices[0].message.content.strip()
-
-    # Strip markdown fences if the model wraps output in ```json ... ```
     raw = re.sub(r"^```[a-z]*\n?", "", raw, flags=re.IGNORECASE)
     raw = re.sub(r"\n?```$", "", raw)
-
     parsed = json.loads(raw)
     tags: list[str] = parsed.get("tags", [])
-
     if not isinstance(tags, list) or len(tags) != 5:
         raise RuntimeError(f"Unexpected tags shape from Groq: {tags}")
-
-    # Normalise and guard against hallucinated values
     sanitised = [
         t.lower().strip() for t in tags
         if isinstance(t, str) and t.lower().strip() in VALID_TAGS
     ]
-    # Pad with fallback tags if some were invalid
     for fb in FALLBACK_TAGS:
         if len(sanitised) >= 5:
             break
         if fb not in sanitised:
             sanitised.append(fb)
-
     return sanitised[:5]
 
 
 def _calculate_match_score(artist_tags: list[str], ai_tags: list[str]) -> float:
-    """
-    Returns a match percentage (0.0–100.0) based on the Jaccard-style
-    intersection of the AI-detected tags against the artist's style tags.
-
-    Formula: (# common tags / # AI tags) * 100
-    Using AI-tag count as the denominator so the score reflects how well
-    the artist covers what the photo analysis found.
-    """
     if not ai_tags:
         return 0.0
     artist_set = {t.lower().strip() for t in (artist_tags or [])}
@@ -263,23 +344,89 @@ def _calculate_match_score(artist_tags: list[str], ai_tags: list[str]) -> float:
 
 
 # ---------------------------------------------------------------------------
-# Routes
+# Auth Routes
+# ---------------------------------------------------------------------------
+
+@app.route("/api/register", methods=["POST"])
+def register():
+    """Register a new user (customer or owner)."""
+    body  = request.get_json(silent=True) or {}
+    name  = (body.get("name") or "").strip()
+    email = (body.get("email") or "").strip().lower()
+    password = (body.get("password") or "").strip()
+    role  = (body.get("role") or "customer").strip().lower()
+
+    errors = []
+    if not name:       errors.append("Name is required.")
+    if not email:      errors.append("Email is required.")
+    if not password or len(password) < 6:
+        errors.append("Password must be at least 6 characters.")
+    if role not in ("customer", "owner"):
+        errors.append("Role must be 'customer' or 'owner'.")
+    if errors:
+        return jsonify({"error": " ".join(errors)}), 400
+
+    if User.query.filter_by(email=email).first():
+        return jsonify({"error": "An account with this email already exists."}), 409
+
+    user = User(
+        name=name,
+        email=email,
+        password_hash=_hash_password(password),
+        role=role,
+        created_at=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+    )
+    db.session.add(user)
+    db.session.commit()
+
+    token = create_token({"sub": user.id, "email": user.email, "role": user.role, "name": user.name})
+    return jsonify({"token": token, "user": user.to_dict()}), 201
+
+
+@app.route("/api/login", methods=["POST"])
+def login():
+    """Login and return a JWT."""
+    body  = request.get_json(silent=True) or {}
+    email = (body.get("email") or "").strip().lower()
+    password = (body.get("password") or "").strip()
+
+    if not email or not password:
+        return jsonify({"error": "Email and password are required."}), 400
+
+    user = User.query.filter_by(email=email).first()
+    if not user or not _check_password(password, user.password_hash):
+        return jsonify({"error": "Invalid email or password."}), 401
+
+    token = create_token({"sub": user.id, "email": user.email, "role": user.role, "name": user.name})
+    return jsonify({"token": token, "user": user.to_dict()})
+
+
+@app.route("/api/me", methods=["GET"])
+@login_required()
+def me():
+    """Return current user info from token."""
+    uid  = request.current_user["sub"]
+    user = User.query.get(uid)
+    if not user:
+        return jsonify({"error": "User not found."}), 404
+    return jsonify(user.to_dict())
+
+
+# ---------------------------------------------------------------------------
+# Artist Routes
 # ---------------------------------------------------------------------------
 
 @app.route("/api/artists", methods=["GET"])
 def get_artists():
     """Return all makeup artists, with optional ?tag= filter."""
     tag = request.args.get("tag", "").strip().lower()
-
     if tag:
-        # Filter in Python — keeps the query simple and DB-agnostic
         artists = [
             a for a in MakeupArtist.query.all()
             if any(tag in t.lower() for t in (a.style_tags or []))
         ]
     else:
         artists = MakeupArtist.query.all()
-
     return jsonify([a.to_dict() for a in artists])
 
 
@@ -290,57 +437,109 @@ def get_artist(artist_id):
     return jsonify(artist.to_dict())
 
 
+@app.route("/api/artists", methods=["POST"])
+@login_required(roles=["owner"])
+def create_artist():
+    """
+    Owner-only: create a new artist/salon listing.
+
+    Request body (JSON):
+        {
+            "name":           "My Salon",
+            "location":       "Connaught Place, Delhi",
+            "starting_price": "₹10,000",
+            "instagram":      "@mysalon",
+            "portfolio_url":  "https://mysalon.com",
+            "phone":          "+91 99999 00000",
+            "style_tags":     ["dewy","airbrush"]
+        }
+    """
+    body = request.get_json(silent=True) or {}
+
+    name           = (body.get("name") or "").strip()
+    location       = (body.get("location") or "").strip()
+    starting_price = (body.get("starting_price") or "").strip()
+    instagram      = (body.get("instagram") or "").strip()
+    portfolio_url  = (body.get("portfolio_url") or "https://auramatch.in").strip()
+    phone          = (body.get("phone") or "").strip()
+    style_tags     = body.get("style_tags") or []
+
+    errors = []
+    if not name:           errors.append("'name' is required.")
+    if not location:       errors.append("'location' is required.")
+    if not starting_price: errors.append("'starting_price' is required.")
+    if not instagram:      errors.append("'instagram' is required.")
+    if not phone:          errors.append("'phone' is required.")
+    if not isinstance(style_tags, list) or len(style_tags) == 0:
+        errors.append("'style_tags' must be a non-empty array.")
+    if errors:
+        return jsonify({"error": " ".join(errors)}), 400
+
+    owner_id = request.current_user["sub"]
+    artist = MakeupArtist(
+        name=name,
+        location=location,
+        starting_price=starting_price,
+        instagram=instagram,
+        portfolio_url=portfolio_url,
+        phone=phone,
+        style_tags=[t.lower().strip() for t in style_tags if isinstance(t, str)],
+        owner_id=owner_id,
+    )
+    db.session.add(artist)
+    db.session.commit()
+    return jsonify({"message": "Listing created!", "artist": artist.to_dict()}), 201
+
+
+@app.route("/api/my-listings", methods=["GET"])
+@login_required(roles=["owner"])
+def my_listings():
+    """Owner-only: list all artists created by the logged-in owner."""
+    owner_id = request.current_user["sub"]
+    artists = MakeupArtist.query.filter_by(owner_id=owner_id).all()
+    return jsonify([a.to_dict() for a in artists])
+
+
+@app.route("/api/artists/<int:artist_id>", methods=["DELETE"])
+@login_required(roles=["owner"])
+def delete_artist(artist_id):
+    """Owner-only: delete your own listing."""
+    owner_id = request.current_user["sub"]
+    artist = MakeupArtist.query.get_or_404(artist_id)
+    if artist.owner_id != owner_id:
+        return jsonify({"error": "You can only delete your own listings."}), 403
+    db.session.delete(artist)
+    db.session.commit()
+    return jsonify({"message": f"Listing '{artist.name}' deleted."})
+
+
+# ---------------------------------------------------------------------------
+# Seed Route
+# ---------------------------------------------------------------------------
+
 @app.route("/api/seed", methods=["POST"])
 def seed():
-    """
-    Clear the makeup_artists table and re-populate it with curated Delhi
-    bridal makeup artists.  Hit this once to get the app into a known state.
-    """
-    # Drop all rows without dropping the table schema
-    db.session.query(MakeupArtist).delete()
+    """Re-populate with curated Delhi artists."""
+    db.session.query(MakeupArtist).filter_by(owner_id=None).delete()
     db.session.commit()
-
     inserted = []
     for data in SEED_ARTISTS:
         artist = MakeupArtist(**data)
         db.session.add(artist)
         inserted.append(data["name"])
-
     db.session.commit()
+    return jsonify({"message": "Database seeded successfully.", "artists_added": len(inserted), "names": inserted}), 201
 
-    return jsonify({
-        "message": "Database seeded successfully.",
-        "artists_added": len(inserted),
-        "names": inserted,
-    }), 201
 
+# ---------------------------------------------------------------------------
+# Match Route
+# ---------------------------------------------------------------------------
 
 @app.route("/api/match", methods=["POST"])
 def match():
-    """
-    Accept a base64-encoded image, run it through Groq Vision to extract
-    5 style tags, then return the top-3 best-matching artists sorted by
-    match score (highest first).
-
-    Request body (JSON):
-        { "image": "<base64 string>" }
-
-    Response (JSON):
-        {
-            "ai_tags": ["dewy", ...],
-            "fallback": false,
-            "results": [
-                {
-                    ...artist fields...,
-                    "match_score": 60.0
-                },
-                ...
-            ]
-        }
-    """
+    """AI image → top-3 artist matches."""
     body = request.get_json(silent=True) or {}
     base64_image: str = body.get("image", "").strip()
-
     if not base64_image:
         return jsonify({"error": "'image' field (base64 string) is required."}), 400
 
@@ -349,56 +548,34 @@ def match():
 
     try:
         ai_tags = _extract_tags_from_image(base64_image)
-
     except APITimeoutError:
-        # Groq took longer than 20 s — use deterministic fallback
         app.logger.warning("Groq request timed out — using fallback tags.")
         ai_tags = FALLBACK_TAGS[:]
         used_fallback = True
-
     except (APIError, RuntimeError, json.JSONDecodeError, KeyError) as exc:
-        # Any other Groq / parse error — log it and fall back gracefully
         app.logger.error("Groq error: %s", exc)
         ai_tags = FALLBACK_TAGS[:]
         used_fallback = True
 
-    # ---- Score every artist ------------------------------------------------
     all_artists = MakeupArtist.query.all()
-
     scored = [
-        {
-            **artist.to_dict(),
-            "match_score": _calculate_match_score(artist.style_tags, ai_tags),
-        }
+        {**artist.to_dict(), "match_score": _calculate_match_score(artist.style_tags, ai_tags)}
         for artist in all_artists
     ]
-
-    # Sort descending by match score, take top 3
     top3 = sorted(scored, key=lambda a: a["match_score"], reverse=True)[:3]
+    return jsonify({"ai_tags": ai_tags, "fallback": used_fallback, "results": top3})
 
-    return jsonify({
-        "ai_tags":  ai_tags,
-        "fallback": used_fallback,
-        "results":  top3,
-    })
 
+# ---------------------------------------------------------------------------
+# Booking Routes
+# ---------------------------------------------------------------------------
 
 @app.route("/api/book", methods=["POST"])
 def book():
     """
-    Submit a consultation booking request.
-
-    Request body (JSON):
-        {
-            "artist_id":      1,
-            "client_name":    "Riya Kapoor",
-            "client_phone":   "+91 99999 00000",
-            "preferred_date": "2026-11-15",
-            "message":        "Looking for a dewy bridal look"
-        }
+    Submit a consultation booking.
+    If a valid JWT is present, links the booking to the logged-in customer.
     """
-    from datetime import datetime, timezone
-
     body = request.get_json(silent=True) or {}
 
     artist_id      = body.get("artist_id")
@@ -408,14 +585,10 @@ def book():
     message        = (body.get("message") or "").strip()
 
     errors = []
-    if not artist_id:
-        errors.append("'artist_id' is required.")
-    if not client_name:
-        errors.append("'client_name' is required.")
-    if not client_phone:
-        errors.append("'client_phone' is required.")
-    if not preferred_date:
-        errors.append("'preferred_date' is required.")
+    if not artist_id:      errors.append("'artist_id' is required.")
+    if not client_name:    errors.append("'client_name' is required.")
+    if not client_phone:   errors.append("'client_phone' is required.")
+    if not preferred_date: errors.append("'preferred_date' is required.")
     if errors:
         return jsonify({"error": "; ".join(errors)}), 400
 
@@ -423,21 +596,26 @@ def book():
     if not artist:
         return jsonify({"error": f"Artist with id={artist_id} not found."}), 404
 
+    # Optionally link to user if they're logged in
+    user_id = None
+    auth = request.headers.get("Authorization", "")
+    if auth.startswith("Bearer "):
+        payload = verify_token(auth.split(" ", 1)[1])
+        if payload:
+            user_id = payload.get("sub")
+
     booking = Booking(
-        artist_id      = artist_id,
-        client_name    = client_name,
-        client_phone   = client_phone,
-        preferred_date = preferred_date,
-        message        = message,
-        created_at     = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        artist_id=artist_id,
+        user_id=user_id,
+        client_name=client_name,
+        client_phone=client_phone,
+        preferred_date=preferred_date,
+        message=message,
+        created_at=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     )
     db.session.add(booking)
     db.session.commit()
-
-    return jsonify({
-        "message": f"Consultation booked with {artist.name}!",
-        "booking": booking.to_dict(),
-    }), 201
+    return jsonify({"message": f"Consultation booked with {artist.name}!", "booking": booking.to_dict()}), 201
 
 
 @app.route("/api/bookings", methods=["GET"])
@@ -447,11 +625,23 @@ def list_bookings():
     return jsonify([b.to_dict() for b in bookings])
 
 
+@app.route("/api/my-bookings", methods=["GET"])
+@login_required(roles=["customer"])
+def my_bookings():
+    """Customer-only: return all bookings made by the logged-in user."""
+    user_id = request.current_user["sub"]
+    bookings = Booking.query.filter_by(user_id=user_id).order_by(Booking.id.desc()).all()
+    return jsonify([b.to_dict() for b in bookings])
+
+
+# ---------------------------------------------------------------------------
+# Health
+# ---------------------------------------------------------------------------
+
 @app.route("/api/health", methods=["GET"])
 def health():
     """Simple health-check endpoint."""
     return jsonify({"status": "ok", "app": "AuraMatch Delhi"})
-
 
 
 # ---------------------------------------------------------------------------
@@ -460,7 +650,6 @@ def health():
 
 with app.app_context():
     db.create_all()
-    # Auto-seed if the database is empty (e.g. after a Render spin-down or rebuild)
     try:
         if not MakeupArtist.query.first():
             app.logger.info("Database is empty. Auto-seeding 5 bridal artists...")

@@ -8,7 +8,7 @@
   <meta name="description"
     content="Upload your bridal moodboard and let AI match you with Delhi's finest makeup artists. Powered by Groq Llama Vision." />
 
-  <!-- Google Fonts: Playfair Display (serif headers) + Inter (body) -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -39,21 +39,12 @@
       --shadow-lg: 0 20px 60px rgba(26, 26, 26, .14);
       --radius: 16px;
       --transition: .3s cubic-bezier(.4, 0, .2, 1);
+      --owner-accent: #7C3AED;
+      --owner-light: #EDE9FE;
     }
 
-    /* ─────────────────────────────────────────────────────────
-       BASE
-    ───────────────────────────────────────────────────────── */
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
       font-family: 'Inter', sans-serif;
       background-color: var(--alabaster);
@@ -61,29 +52,21 @@
       min-height: 100vh;
       overflow-x: hidden;
     }
-
-    h1,
-    h2,
-    h3,
-    h4,
-    .serif {
-      font-family: 'Playfair Display', Georgia, serif;
-    }
+    h1, h2, h3, h4, .serif { font-family: 'Playfair Display', Georgia, serif; }
 
     /* ─────────────────────────────────────────────────────────
        NAVBAR
     ───────────────────────────────────────────────────────── */
     .am-nav {
-      background: rgba(250, 250, 250, .88);
+      background: rgba(250, 250, 250, .92);
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
       border-bottom: 1px solid var(--border);
-      padding: .9rem 0;
+      padding: .85rem 0;
       position: sticky;
       top: 0;
       z-index: 1030;
     }
-
     .am-nav .brand {
       font-family: 'Playfair Display', serif;
       font-size: 1.35rem;
@@ -92,10 +75,7 @@
       letter-spacing: -.2px;
       text-decoration: none;
     }
-
-    .am-nav .brand span {
-      color: var(--gold);
-    }
+    .am-nav .brand span { color: var(--gold); }
 
     .nav-pill {
       background: var(--warm-grey);
@@ -109,964 +89,543 @@
       text-transform: uppercase;
     }
 
+    /* Auth nav area */
+    .nav-auth { display: flex; align-items: center; gap: .6rem; }
+    .nav-user-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: .45rem;
+      border-radius: 50px;
+      padding: .3rem .9rem .3rem .5rem;
+      font-size: .8rem;
+      font-weight: 600;
+      cursor: default;
+    }
+    .nav-user-chip.role-customer {
+      background: #E0F2FE;
+      color: #0369A1;
+    }
+    .nav-user-chip.role-owner {
+      background: var(--owner-light);
+      color: var(--owner-accent);
+    }
+    .nav-user-chip .role-avatar {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .75rem;
+      color: #fff;
+    }
+    .role-customer .role-avatar { background: #0369A1; }
+    .role-owner   .role-avatar { background: var(--owner-accent); }
+
+    .btn-nav-auth {
+      border: 1.5px solid var(--border);
+      background: transparent;
+      border-radius: 50px;
+      padding: .32rem .95rem;
+      font-size: .8rem;
+      font-weight: 600;
+      color: var(--charcoal);
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .btn-nav-auth:hover {
+      background: var(--charcoal);
+      color: #fff;
+      border-color: var(--charcoal);
+    }
+    .btn-nav-auth.primary {
+      background: var(--charcoal);
+      color: #fff;
+      border-color: var(--charcoal);
+    }
+    .btn-nav-auth.primary:hover {
+      background: #333;
+      box-shadow: 0 4px 14px rgba(0,0,0,.2);
+    }
+    .btn-nav-logout {
+      background: transparent;
+      border: none;
+      padding: .28rem .7rem;
+      font-size: .8rem;
+      color: #c00;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+    .btn-nav-logout:hover { background: #FFECEC; }
+
     /* ─────────────────────────────────────────────────────────
        GOLD ACCENT LINE
     ───────────────────────────────────────────────────────── */
     .gold-rule {
-      width: 48px;
-      height: 2px;
+      width: 48px; height: 2px;
       background: linear-gradient(90deg, var(--gold), var(--gold-light));
       border-radius: 2px;
       margin: 0 auto 1.25rem;
     }
 
     /* ─────────────────────────────────────────────────────────
-       STATE WRAPPER — show/hide logic
+       STATE WRAPPER
     ───────────────────────────────────────────────────────── */
-    .state-panel {
-      display: none;
-      animation: fadeUp .45s var(--transition) both;
-    }
-
-    .state-panel.active {
-      display: block;
-    }
+    .state-panel { display: none; animation: fadeUp .45s var(--transition) both; }
+    .state-panel.active { display: block; }
 
     @keyframes fadeUp {
-      from {
-        opacity: 0;
-        transform: translateY(22px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
     /* ─────────────────────────────────────────────────────────
        ① LANDING STATE
     ───────────────────────────────────────────────────────── */
-    .hero-section {
-      padding: 6rem 0 3.5rem;
-    }
+    .hero-section { padding: 6rem 0 3.5rem; }
 
     .hero-kicker {
-      display: inline-flex;
-      align-items: center;
-      gap: .5rem;
-      background: var(--warm-grey);
-      border: 1px solid var(--border);
-      border-radius: 40px;
-      padding: .3rem 1rem;
-      font-size: .75rem;
-      font-weight: 600;
-      letter-spacing: .8px;
-      text-transform: uppercase;
-      color: var(--gold-dark);
-      margin-bottom: 1.5rem;
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: var(--warm-grey); border: 1px solid var(--border);
+      border-radius: 40px; padding: .3rem 1rem;
+      font-size: .75rem; font-weight: 600; letter-spacing: .8px;
+      text-transform: uppercase; color: var(--gold-dark); margin-bottom: 1.5rem;
     }
-
     .hero-kicker .dot {
-      width: 6px;
-      height: 6px;
-      background: var(--gold);
-      border-radius: 50%;
+      width: 6px; height: 6px; background: var(--gold); border-radius: 50%;
       animation: pulse 2s ease-in-out infinite;
     }
-
     @keyframes pulse {
-
-      0%,
-      100% {
-        opacity: 1;
-        transform: scale(1);
-      }
-
-      50% {
-        opacity: .5;
-        transform: scale(1.4);
-      }
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: .5; transform: scale(1.4); }
     }
 
     .hero-title {
       font-size: clamp(2.6rem, 6vw, 4.2rem);
-      font-weight: 700;
-      line-height: 1.12;
-      letter-spacing: -.5px;
-      color: var(--charcoal);
-      margin-bottom: 1.25rem;
+      font-weight: 700; line-height: 1.12;
+      letter-spacing: -.5px; color: var(--charcoal); margin-bottom: 1.25rem;
     }
-
-    .hero-title em {
-      font-style: italic;
-      color: var(--gold-dark);
-    }
-
+    .hero-title em { font-style: italic; color: var(--gold-dark); }
     .hero-sub {
-      font-size: 1.05rem;
-      font-weight: 300;
-      color: #555;
-      line-height: 1.7;
-      max-width: 500px;
+      font-size: 1.05rem; font-weight: 300; color: #555; line-height: 1.7; max-width: 500px;
     }
 
-    /* ─── Drop Zone ─── */
+    /* Drop Zone */
     .drop-zone {
-      position: relative;
-      border: 2px dashed var(--border);
-      border-radius: var(--radius);
-      background: var(--card-bg);
-      padding: 3.5rem 2rem;
-      text-align: center;
-      cursor: pointer;
+      position: relative; border: 2px dashed var(--border);
+      border-radius: var(--radius); background: var(--card-bg);
+      padding: 3.5rem 2rem; text-align: center; cursor: pointer;
       transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
       overflow: hidden;
     }
-
     .drop-zone::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(212, 175, 55, .04) 0%, transparent 60%);
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(212,175,55,.04) 0%, transparent 60%);
       pointer-events: none;
     }
-
-    .drop-zone:hover,
-    .drop-zone.dragover {
+    .drop-zone:hover, .drop-zone.dragover {
       border-color: var(--gold);
-      background: rgba(212, 175, 55, .03);
-      box-shadow: 0 0 0 4px rgba(212, 175, 55, .12), var(--shadow-md);
+      background: rgba(212,175,55,.03);
+      box-shadow: 0 0 0 4px rgba(212,175,55,.12), var(--shadow-md);
     }
-
     .drop-icon {
-      width: 68px;
-      height: 68px;
+      width: 68px; height: 68px;
       background: linear-gradient(135deg, var(--warm-grey), #EDE9E2);
       border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       margin: 0 auto 1.4rem;
       transition: transform var(--transition), background var(--transition);
-      font-size: 1.7rem;
-      color: var(--gold-dark);
+      font-size: 1.7rem; color: var(--gold-dark);
     }
-
-    .drop-zone:hover .drop-icon,
-    .drop-zone.dragover .drop-icon {
+    .drop-zone:hover .drop-icon, .drop-zone.dragover .drop-icon {
       transform: scale(1.1) translateY(-3px);
       background: linear-gradient(135deg, #EDE9E2, #E5DDD0);
     }
-
     .drop-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: var(--charcoal);
-      margin-bottom: .5rem;
+      font-family: 'Playfair Display', serif; font-size: 1.25rem;
+      font-weight: 600; color: var(--charcoal); margin-bottom: .5rem;
     }
+    .drop-sub { font-size: .85rem; color: var(--mid-grey); margin-bottom: 1.4rem; }
+    #file-input { display: none; }
 
-    .drop-sub {
-      font-size: .85rem;
-      color: var(--mid-grey);
-      margin-bottom: 1.4rem;
-    }
-
-    #file-input {
-      display: none;
-    }
-
-    /* ─── Buttons ─── */
+    /* Buttons */
     .btn-gold {
       background: linear-gradient(135deg, var(--charcoal) 0%, #2d2d2d 100%);
-      color: #fff;
-      border: none;
-      border-radius: 50px;
-      padding: .7rem 2rem;
-      font-size: .9rem;
-      font-weight: 600;
-      letter-spacing: .3px;
-      transition: all var(--transition);
-      position: relative;
-      overflow: hidden;
+      color: #fff; border: none; border-radius: 50px; padding: .7rem 2rem;
+      font-size: .9rem; font-weight: 600; letter-spacing: .3px;
+      transition: all var(--transition); position: relative; overflow: hidden;
     }
-
     .btn-gold::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(212, 175, 55, .15) 0%, rgba(212, 175, 55, .05) 100%);
-      opacity: 0;
-      transition: opacity var(--transition);
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(212,175,55,.15) 0%, rgba(212,175,55,.05) 100%);
+      opacity: 0; transition: opacity var(--transition);
     }
-
-    .btn-gold:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(26, 26, 26, .25);
-      color: #fff;
-    }
-
-    .btn-gold:hover::after {
-      opacity: 1;
-    }
-
-    .btn-gold:active {
-      transform: translateY(0);
-    }
+    .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,26,26,.25); color: #fff; }
+    .btn-gold:hover::after { opacity: 1; }
+    .btn-gold:active { transform: translateY(0); }
 
     .btn-outline-gold {
-      background: transparent;
-      color: var(--charcoal);
-      border: 1.5px solid var(--charcoal);
-      border-radius: 50px;
-      padding: .65rem 1.75rem;
-      font-size: .88rem;
-      font-weight: 600;
-      letter-spacing: .3px;
-      transition: all var(--transition);
+      background: transparent; color: var(--charcoal);
+      border: 1.5px solid var(--charcoal); border-radius: 50px;
+      padding: .65rem 1.75rem; font-size: .88rem; font-weight: 600;
+      letter-spacing: .3px; transition: all var(--transition);
     }
-
-    .btn-outline-gold:hover {
-      background: var(--charcoal);
-      color: #fff;
-      transform: translateY(-1px);
-    }
+    .btn-outline-gold:hover { background: var(--charcoal); color: #fff; transform: translateY(-1px); }
 
     .format-badge {
-      display: inline-block;
-      background: var(--warm-grey);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: .15rem .5rem;
-      font-size: .7rem;
-      font-weight: 600;
-      color: var(--mid-grey);
-      letter-spacing: .4px;
-      text-transform: uppercase;
-      margin: 0 2px;
+      display: inline-block; background: var(--warm-grey); border: 1px solid var(--border);
+      border-radius: 6px; padding: .15rem .5rem; font-size: .7rem; font-weight: 600;
+      color: var(--mid-grey); letter-spacing: .4px; text-transform: uppercase; margin: 0 2px;
     }
 
-    /* ─── Stats strip ─── */
-    .stats-strip {
-      border-top: 1px solid var(--border);
-      padding: 2.5rem 0;
-      margin-top: 3rem;
-    }
-
-    .stat-item {
-      text-align: center;
-    }
-
+    /* Stats strip */
+    .stats-strip { border-top: 1px solid var(--border); padding: 2.5rem 0; margin-top: 3rem; }
+    .stat-item { text-align: center; }
     .stat-number {
-      font-family: 'Playfair Display', serif;
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--charcoal);
-      line-height: 1;
-      margin-bottom: .25rem;
+      font-family: 'Playfair Display', serif; font-size: 2rem;
+      font-weight: 700; color: var(--charcoal); line-height: 1; margin-bottom: .25rem;
     }
-
     .stat-label {
-      font-size: .78rem;
-      font-weight: 500;
-      color: var(--mid-grey);
-      letter-spacing: .5px;
-      text-transform: uppercase;
-    }
-
-    .stat-sep {
-      width: 1px;
-      background: var(--border);
-      height: 40px;
-      margin: auto;
+      font-size: .78rem; font-weight: 500; color: var(--mid-grey); letter-spacing: .5px; text-transform: uppercase;
     }
 
     /* ─────────────────────────────────────────────────────────
        ② PROCESSING STATE
     ───────────────────────────────────────────────────────── */
-    .processing-section {
-      min-height: 70vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
+    .processing-section { min-height: 70vh; display: flex; align-items: center; justify-content: center; }
     .processing-card {
-      background: var(--card-bg);
-      border-radius: 24px;
-      padding: 4rem 3rem;
-      text-align: center;
-      box-shadow: var(--shadow-lg);
-      border: 1px solid var(--border);
-      max-width: 420px;
-      width: 100%;
+      background: var(--card-bg); border-radius: 24px; padding: 4rem 3rem;
+      text-align: center; box-shadow: var(--shadow-lg); border: 1px solid var(--border);
+      max-width: 420px; width: 100%;
     }
-
-    .gold-spinner-wrap {
-      position: relative;
-      width: 80px;
-      height: 80px;
-      margin: 0 auto 2rem;
-    }
-
+    .gold-spinner-wrap { position: relative; width: 80px; height: 80px; margin: 0 auto 2rem; }
     .gold-spinner {
-      width: 80px;
-      height: 80px;
-      border: 3px solid var(--border);
-      border-top-color: var(--gold);
-      border-right-color: var(--gold-light);
-      border-radius: 50%;
-      animation: spin 1.1s linear infinite;
+      width: 80px; height: 80px; border: 3px solid var(--border);
+      border-top-color: var(--gold); border-right-color: var(--gold-light);
+      border-radius: 50%; animation: spin 1.1s linear infinite;
     }
-
     .gold-spinner-inner {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 48px;
-      height: 48px;
-      border: 2px solid transparent;
-      border-top-color: var(--charcoal);
-      border-radius: 50%;
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      width: 48px; height: 48px; border: 2px solid transparent;
+      border-top-color: var(--charcoal); border-radius: 50%;
       animation: spin .7s linear infinite reverse;
     }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    .processing-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: var(--charcoal);
-      margin-bottom: .6rem;
-    }
-
-    .processing-sub {
-      font-size: .88rem;
-      color: var(--mid-grey);
-      line-height: 1.6;
-    }
-
-    .processing-steps {
-      margin-top: 1.8rem;
-      list-style: none;
-      padding: 0;
-      text-align: left;
-    }
-
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .processing-title { font-size: 1.2rem; font-weight: 600; color: var(--charcoal); margin-bottom: .6rem; }
+    .processing-sub { font-size: .88rem; color: var(--mid-grey); line-height: 1.6; }
+    .processing-steps { margin-top: 1.8rem; list-style: none; padding: 0; text-align: left; }
     .processing-steps li {
-      display: flex;
-      align-items: center;
-      gap: .65rem;
-      padding: .5rem 0;
-      font-size: .82rem;
-      color: #888;
-      border-bottom: 1px solid var(--border);
-      transition: color .4s;
+      display: flex; align-items: center; gap: .65rem; padding: .5rem 0;
+      font-size: .82rem; color: #888; border-bottom: 1px solid var(--border); transition: color .4s;
     }
-
-    .processing-steps li:last-child {
-      border-bottom: none;
-    }
-
+    .processing-steps li:last-child { border-bottom: none; }
     .step-icon {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: .65rem;
-      flex-shrink: 0;
-      background: var(--warm-grey);
-      color: var(--mid-grey);
-      transition: all .4s;
+      width: 22px; height: 22px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .65rem; flex-shrink: 0; background: var(--warm-grey); color: var(--mid-grey); transition: all .4s;
     }
-
-    .step-icon.done {
-      background: linear-gradient(135deg, var(--gold), var(--gold-light));
-      color: #fff;
-    }
+    .step-icon.done { background: linear-gradient(135deg, var(--gold), var(--gold-light)); color: #fff; }
 
     /* ─────────────────────────────────────────────────────────
        ③ RESULTS STATE
     ───────────────────────────────────────────────────────── */
-    .results-section {
-      padding: 3rem 0 5rem;
-    }
+    .results-section { padding: 3rem 0 5rem; }
+    .results-header { margin-bottom: 2.5rem; }
+    .results-title { font-size: clamp(1.6rem,4vw,2.4rem); font-weight: 700; color: var(--charcoal); margin-bottom: .5rem; }
 
-    .results-header {
-      margin-bottom: 2.5rem;
-    }
-
-    .results-title {
-      font-size: clamp(1.6rem, 4vw, 2.4rem);
-      font-weight: 700;
-      color: var(--charcoal);
-      margin-bottom: .5rem;
-    }
-
-    /* ─── Left column: image + tags ─── */
     .preview-card {
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      overflow: hidden;
-      box-shadow: var(--shadow-sm);
-      position: sticky;
-      top: 90px;
+      background: var(--card-bg); border-radius: var(--radius); border: 1px solid var(--border);
+      overflow: hidden; box-shadow: var(--shadow-sm); position: sticky; top: 90px;
     }
-
-    #preview-image {
-      width: 100%;
-      aspect-ratio: 4/5;
-      object-fit: cover;
-      display: block;
-    }
-
-    .preview-body {
-      padding: 1.4rem;
-    }
-
+    #preview-image { width: 100%; aspect-ratio: 4/5; object-fit: cover; display: block; }
+    .preview-body { padding: 1.4rem; }
     .preview-label {
-      font-size: .7rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: var(--gold-dark);
-      margin-bottom: .9rem;
-      display: flex;
-      align-items: center;
-      gap: .4rem;
+      font-size: .7rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--gold-dark); margin-bottom: .9rem; display: flex; align-items: center; gap: .4rem;
     }
-
-    .preview-label::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
+    .preview-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
     .ai-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: .35rem;
-      background: var(--warm-grey);
-      border: 1px solid var(--border);
-      border-radius: 50px;
-      padding: .3rem .85rem;
-      font-size: .78rem;
-      font-weight: 500;
-      color: var(--charcoal);
-      margin: .25rem .2rem;
-      transition: all var(--transition);
+      display: inline-flex; align-items: center; gap: .35rem;
+      background: var(--warm-grey); border: 1px solid var(--border); border-radius: 50px;
+      padding: .3rem .85rem; font-size: .78rem; font-weight: 500; color: var(--charcoal);
+      margin: .25rem .2rem; transition: all var(--transition);
     }
-
-    .ai-tag:hover {
-      background: var(--charcoal);
-      color: #fff;
-      border-color: var(--charcoal);
-      transform: translateY(-1px);
-    }
-
-    .ai-tag .tag-dot {
-      width: 5px;
-      height: 5px;
-      background: var(--gold);
-      border-radius: 50%;
-    }
+    .ai-tag:hover { background: var(--charcoal); color: #fff; border-color: var(--charcoal); transform: translateY(-1px); }
+    .ai-tag .tag-dot { width: 5px; height: 5px; background: var(--gold); border-radius: 50%; }
 
     .fallback-notice {
-      display: flex;
-      align-items: center;
-      gap: .5rem;
-      background: #FFF9E6;
-      border: 1px solid #F0D870;
-      border-radius: 8px;
-      padding: .6rem .9rem;
-      font-size: .76rem;
-      color: #7A6000;
-      margin-top: 1rem;
+      display: flex; align-items: center; gap: .5rem;
+      background: #FFF9E6; border: 1px solid #F0D870; border-radius: 8px;
+      padding: .6rem .9rem; font-size: .76rem; color: #7A6000; margin-top: 1rem;
     }
 
-    /* ─── MUA Cards ─── */
+    /* MUA Cards */
     .mua-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-      box-shadow: var(--shadow-sm);
+      background: var(--card-bg); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm);
       transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
       margin-bottom: 1.25rem;
     }
-
-    .mua-card:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-lg);
-      border-color: rgba(212, 175, 55, .3);
-    }
-
-    .mua-card-inner {
-      display: flex;
-      align-items: stretch;
-    }
+    .mua-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: rgba(212,175,55,.3); }
+    .mua-card-inner { display: flex; align-items: stretch; }
 
     .rank-strip {
-      width: 52px;
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 1.2rem .5rem;
-      position: relative;
+      width: 52px; flex-shrink: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; padding: 1.2rem .5rem; position: relative;
     }
+    .rank-strip.rank-1 { background: linear-gradient(180deg,#F8F2DC 0%,#EFE4AA 100%); }
+    .rank-strip.rank-2 { background: linear-gradient(180deg,#F4F4F4 0%,#E8E8E8 100%); }
+    .rank-strip.rank-3 { background: linear-gradient(180deg,#FDF0E8 0%,#F0D9C8 100%); }
+    .rank-number { font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; line-height:1; }
+    .rank-strip.rank-1 .rank-number { color:#A88B1D; }
+    .rank-strip.rank-2 .rank-number { color:#888; }
+    .rank-strip.rank-3 .rank-number { color:#A0663A; }
+    .rank-medal { font-size:.9rem; margin-top:.2rem; }
 
-    .rank-strip.rank-1 {
-      background: linear-gradient(180deg, #F8F2DC 0%, #EFE4AA 100%);
-    }
+    .mua-card-body { flex: 1; padding: 1.3rem 1.4rem; }
+    .mua-name { font-family:'Playfair Display',serif; font-size:1.08rem; font-weight:700; color:var(--charcoal); margin-bottom:.2rem; }
+    .mua-location { font-size:.8rem; color:var(--mid-grey); display:flex; align-items:center; gap:.3rem; margin-bottom:.85rem; }
 
-    .rank-strip.rank-2 {
-      background: linear-gradient(180deg, #F4F4F4 0%, #E8E8E8 100%);
-    }
-
-    .rank-strip.rank-3 {
-      background: linear-gradient(180deg, #FDF0E8 0%, #F0D9C8 100%);
-    }
-
-    .rank-number {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.4rem;
-      font-weight: 700;
-      line-height: 1;
-    }
-
-    .rank-strip.rank-1 .rank-number {
-      color: #A88B1D;
-    }
-
-    .rank-strip.rank-2 .rank-number {
-      color: #888;
-    }
-
-    .rank-strip.rank-3 .rank-number {
-      color: #A0663A;
-    }
-
-    .rank-medal {
-      font-size: .9rem;
-      margin-top: .2rem;
-    }
-
-    .mua-card-body {
-      flex: 1;
-      padding: 1.3rem 1.4rem;
-    }
-
-    .mua-name {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.08rem;
-      font-weight: 700;
-      color: var(--charcoal);
-      margin-bottom: .2rem;
-    }
-
-    .mua-location {
-      font-size: .8rem;
-      color: var(--mid-grey);
-      display: flex;
-      align-items: center;
-      gap: .3rem;
-      margin-bottom: .85rem;
-    }
-
-    .match-bar-wrap {
-      margin-bottom: .9rem;
-    }
-
-    .match-bar-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: .35rem;
-    }
-
-    .match-label {
-      font-size: .72rem;
-      font-weight: 600;
-      letter-spacing: .5px;
-      text-transform: uppercase;
-      color: var(--mid-grey);
-    }
-
-    .match-pct {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--gold-dark);
-    }
-
-    .match-bar-bg {
-      height: 5px;
-      background: var(--warm-grey);
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
+    .match-bar-wrap { margin-bottom: .9rem; }
+    .match-bar-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:.35rem; }
+    .match-label { font-size:.72rem; font-weight:600; letter-spacing:.5px; text-transform:uppercase; color:var(--mid-grey); }
+    .match-pct { font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; color:var(--gold-dark); }
+    .match-bar-bg { height:5px; background:var(--warm-grey); border-radius:10px; overflow:hidden; }
     .match-bar-fill {
-      height: 100%;
-      border-radius: 10px;
-      background: linear-gradient(90deg, var(--charcoal), var(--gold));
-      transition: width 1s cubic-bezier(.4, 0, .2, 1);
+      height:100%; border-radius:10px;
+      background:linear-gradient(90deg, var(--charcoal), var(--gold));
+      transition:width 1s cubic-bezier(.4,0,.2,1);
     }
 
-    .mua-meta {
-      display: flex;
-      align-items: center;
-      gap: .6rem;
-      flex-wrap: wrap;
-      margin-bottom: 1rem;
-    }
-
+    .mua-meta { display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; margin-bottom:1rem; }
     .meta-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: .3rem;
-      background: var(--warm-grey);
-      border-radius: 6px;
-      padding: .22rem .65rem;
-      font-size: .75rem;
-      color: #555;
-      font-weight: 500;
+      display:inline-flex; align-items:center; gap:.3rem;
+      background:var(--warm-grey); border-radius:6px; padding:.22rem .65rem;
+      font-size:.75rem; color:#555; font-weight:500;
     }
+    .meta-chip i { color:var(--gold-dark); font-size:.75rem; }
 
-    .meta-chip i {
-      color: var(--gold-dark);
-      font-size: .75rem;
-    }
-
-    .mua-card-actions {
-      display: flex;
-      gap: .6rem;
-      align-items: center;
-    }
+    .mua-card-actions { display:flex; gap:.6rem; align-items:center; }
 
     .btn-book {
-      flex: 1;
-      background: var(--charcoal);
-      color: #fff;
-      border: none;
-      border-radius: 50px;
-      padding: .55rem 1.2rem;
-      font-size: .83rem;
-      font-weight: 600;
-      letter-spacing: .2px;
-      transition: all var(--transition);
-      position: relative;
-      overflow: hidden;
+      flex: 1; background: var(--charcoal); color: #fff; border: none; border-radius: 50px;
+      padding: .55rem 1.2rem; font-size: .83rem; font-weight: 600; letter-spacing: .2px;
+      transition: all var(--transition); position: relative; overflow: hidden; cursor: pointer;
     }
-
     .btn-book::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(212, 175, 55, .2), transparent);
-      opacity: 0;
-      transition: opacity var(--transition);
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(135deg, rgba(212,175,55,.2), transparent); opacity:0; transition:opacity var(--transition);
     }
-
-    .btn-book:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(26, 26, 26, .3);
-      color: #fff;
-    }
-
-    .btn-book:hover::after {
-      opacity: 1;
-    }
+    .btn-book:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(26,26,26,.3); color:#fff; }
+    .btn-book:hover::after { opacity:1; }
 
     .btn-ig {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      border: 1.5px solid var(--border);
-      background: transparent;
-      color: var(--charcoal);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-      transition: all var(--transition);
-      flex-shrink: 0;
+      width:38px; height:38px; border-radius:50%;
+      border:1.5px solid var(--border); background:transparent; color:var(--charcoal);
+      display:flex; align-items:center; justify-content:center;
+      font-size:1rem; transition:all var(--transition); flex-shrink:0;
     }
-
-    .btn-ig:hover {
-      background: var(--charcoal);
-      color: #fff;
-      border-color: var(--charcoal);
-      transform: scale(1.1);
-    }
+    .btn-ig:hover { background:var(--charcoal); color:#fff; border-color:var(--charcoal); transform:scale(1.1); }
 
     .btn-call {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      border: 1.5px solid #28a745;
-      background: transparent;
-      color: #28a745;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-      transition: all var(--transition);
-      flex-shrink: 0;
-      text-decoration: none;
+      width:38px; height:38px; border-radius:50%;
+      border:1.5px solid #28a745; background:transparent; color:#28a745;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1rem; transition:all var(--transition); flex-shrink:0; text-decoration:none;
     }
+    .btn-call:hover { background:#28a745; color:#fff; transform:scale(1.1); }
 
-    .btn-call:hover {
-      background: #28a745;
-      color: #fff;
-      border-color: #28a745;
-      transform: scale(1.1);
-    }
-
-    /* ── Booking Modal ── */
-    .modal-content {
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow-lg);
-    }
-
-    .modal-header {
-      border-bottom: 1px solid var(--border);
-      padding: 1.4rem 1.75rem;
-    }
-
-    .modal-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--charcoal);
-    }
-
+    /* Booking Modal */
+    .modal-content { border-radius:20px; border:1px solid var(--border); box-shadow:var(--shadow-lg); }
+    .modal-header { border-bottom:1px solid var(--border); padding:1.4rem 1.75rem; }
+    .modal-title { font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:700; color:var(--charcoal); }
     .modal-artist-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: .45rem;
-      background: var(--warm-grey);
-      border: 1px solid var(--border);
-      border-radius: 50px;
-      padding: .25rem .9rem;
-      font-size: .8rem;
-      font-weight: 600;
-      color: var(--gold-dark);
-      margin-bottom: 1.2rem;
+      display:inline-flex; align-items:center; gap:.45rem;
+      background:var(--warm-grey); border:1px solid var(--border); border-radius:50px;
+      padding:.25rem .9rem; font-size:.8rem; font-weight:600; color:var(--gold-dark); margin-bottom:1.2rem;
     }
-
-    .form-label {
-      font-size: .8rem;
-      font-weight: 600;
-      color: var(--charcoal);
-      letter-spacing: .2px;
+    .form-label { font-size:.8rem; font-weight:600; color:var(--charcoal); letter-spacing:.2px; }
+    .form-control, .form-select {
+      border:1.5px solid var(--border); border-radius:10px; font-size:.88rem;
+      padding:.55rem .85rem; transition:border-color var(--transition), box-shadow var(--transition);
     }
-
-    .form-control,
-    .form-select {
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      font-size: .88rem;
-      padding: .55rem .85rem;
-      transition: border-color var(--transition), box-shadow var(--transition);
-    }
-
-    .form-control:focus,
-    .form-select:focus {
-      border-color: var(--gold);
-      box-shadow: 0 0 0 3px rgba(212, 175, 55, .15);
-      outline: none;
-    }
-
+    .form-control:focus, .form-select:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(212,175,55,.15); outline:none; }
     .modal-phone-strip {
-      display: flex;
-      align-items: center;
-      gap: .6rem;
-      background: #F0FDF4;
-      border: 1px solid #BBF7D0;
-      border-radius: 10px;
-      padding: .7rem 1rem;
-      margin-bottom: 1rem;
+      display:flex; align-items:center; gap:.6rem; background:#F0FDF4;
+      border:1px solid #BBF7D0; border-radius:10px; padding:.7rem 1rem; margin-bottom:1rem;
     }
-
-    .modal-phone-strip i {
-      color: #16a34a;
-      font-size: 1.1rem;
-    }
-
-    .modal-phone-strip .ph-num {
-      font-weight: 600;
-      font-size: .9rem;
-      color: var(--charcoal);
-      flex: 1;
-    }
-
-    .modal-phone-strip a {
-      font-size: .8rem;
-      font-weight: 600;
-      color: #16a34a;
-      text-decoration: none;
-    }
-
-    .modal-phone-strip a:hover {
-      text-decoration: underline;
-    }
+    .modal-phone-strip i { color:#16a34a; font-size:1.1rem; }
+    .modal-phone-strip .ph-num { font-weight:600; font-size:.9rem; color:var(--charcoal); flex:1; }
+    .modal-phone-strip a { font-size:.8rem; font-weight:600; color:#16a34a; text-decoration:none; }
+    .modal-phone-strip a:hover { text-decoration:underline; }
 
     .btn-submit-book {
-      background: linear-gradient(135deg, var(--charcoal), #2d2d2d);
-      color: #fff;
-      border: none;
-      border-radius: 50px;
-      padding: .65rem 2rem;
-      font-size: .9rem;
-      font-weight: 600;
-      width: 100%;
-      transition: all var(--transition);
-      position: relative;
-      overflow: hidden;
+      background:linear-gradient(135deg,var(--charcoal),#2d2d2d); color:#fff; border:none;
+      border-radius:50px; padding:.65rem 2rem; font-size:.9rem; font-weight:600; width:100%;
+      transition:all var(--transition); position:relative; overflow:hidden;
     }
-
     .btn-submit-book::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(212, 175, 55, .18), transparent);
-      opacity: 0;
-      transition: opacity var(--transition);
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(135deg,rgba(212,175,55,.18),transparent); opacity:0; transition:opacity var(--transition);
     }
+    .btn-submit-book:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(26,26,26,.25); }
+    .btn-submit-book:hover::after { opacity:1; }
 
-    .btn-submit-book:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(26, 26, 26, .25);
-    }
-
-    .btn-submit-book:hover::after {
-      opacity: 1;
-    }
-
-    .booking-success {
-      text-align: center;
-      padding: 1.5rem 0 .5rem;
-    }
-
+    .booking-success { text-align:center; padding:1.5rem 0 .5rem; }
     .booking-success .success-icon {
-      width: 68px;
-      height: 68px;
-      background: linear-gradient(135deg, #D4EDDA, #A8D5B5);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.8rem;
-      margin: 0 auto 1.2rem;
+      width:68px; height:68px; background:linear-gradient(135deg,#D4EDDA,#A8D5B5);
+      border-radius:50%; display:flex; align-items:center; justify-content:center;
+      font-size:1.8rem; margin:0 auto 1.2rem;
     }
+    .booking-success h5 { font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:700; color:var(--charcoal); margin-bottom:.5rem; }
+    .booking-success p { font-size:.88rem; color:var(--mid-grey); line-height:1.6; }
 
-    .booking-success h5 {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: var(--charcoal);
-      margin-bottom: .5rem;
-    }
-
-    .booking-success p {
-      font-size: .88rem;
-      color: var(--mid-grey);
-      line-height: 1.6;
-    }
-
-    /* ─── Try Again button ─── */
-    .try-again-wrap {
-      text-align: center;
-      margin-top: 2.5rem;
-    }
+    .try-again-wrap { text-align:center; margin-top:2.5rem; }
 
     /* ─────────────────────────────────────────────────────────
-       FOOTER
+       ④ CUSTOMER DASHBOARD
     ───────────────────────────────────────────────────────── */
-    .am-footer {
-      border-top: 1px solid var(--border);
-      padding: 2rem 0;
-      text-align: center;
-      font-size: .8rem;
-      color: var(--mid-grey);
+    .dashboard-section { padding: 4rem 0 5rem; }
+    .dash-header { margin-bottom: 2.5rem; }
+    .dash-title { font-size: clamp(1.5rem,4vw,2.2rem); font-weight:700; color:var(--charcoal); margin-bottom:.35rem; }
+
+    .booking-history-card {
+      background:var(--card-bg); border:1px solid var(--border); border-radius:var(--radius);
+      overflow:hidden; box-shadow:var(--shadow-sm); margin-bottom:1rem;
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+    .booking-history-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-md); }
+    .booking-history-inner { display:flex; align-items:center; gap:1rem; padding:1.1rem 1.4rem; }
+    .booking-hist-icon {
+      width:48px; height:48px; border-radius:12px; flex-shrink:0;
+      background:linear-gradient(135deg,var(--warm-grey),#EDE9E2);
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.3rem; color:var(--gold-dark);
+    }
+    .booking-hist-body { flex:1; min-width:0; }
+    .booking-hist-artist { font-weight:700; font-size:.95rem; color:var(--charcoal); margin-bottom:.15rem; }
+    .booking-hist-meta { font-size:.78rem; color:var(--mid-grey); display:flex; flex-wrap:wrap; gap:.7rem; }
+    .booking-hist-meta span { display:flex; align-items:center; gap:.25rem; }
+    .booking-hist-date {
+      font-size:.8rem; font-weight:600; color:var(--gold-dark);
+      background:linear-gradient(135deg,#FBF5DC,#F5E89A);
+      border-radius:8px; padding:.22rem .65rem; white-space:nowrap;
     }
 
-    .am-footer strong {
-      color: var(--charcoal);
+    .empty-state {
+      text-align:center; padding:4rem 2rem; color:var(--mid-grey);
     }
+    .empty-state i { font-size:2.8rem; display:block; margin-bottom:1rem; color:var(--border); }
+    .empty-state h5 { font-size:1.05rem; color:#888; margin-bottom:.5rem; }
+    .empty-state p { font-size:.85rem; }
 
     /* ─────────────────────────────────────────────────────────
-       RESPONSIVE
+       ⑤ OWNER DASHBOARD
     ───────────────────────────────────────────────────────── */
-    @media (max-width: 768px) {
-      .hero-section {
-        padding: 3.5rem 0 2rem;
-      }
-
-      .hero-title {
-        font-size: 2.2rem;
-      }
-
-      .drop-zone {
-        padding: 2.2rem 1.2rem;
-      }
-
-      .processing-card {
-        padding: 2.8rem 1.5rem;
-      }
-
-      .results-section {
-        padding: 2rem 0 3rem;
-      }
-
-      .mua-card-inner {
-        flex-direction: column;
-      }
-
-      .rank-strip {
-        width: 100%;
-        flex-direction: row;
-        padding: .6rem 1rem;
-        gap: .4rem;
-      }
-
-      .preview-card {
-        position: static;
-      }
+    .owner-accent-line {
+      width:48px; height:3px;
+      background:linear-gradient(90deg,var(--owner-accent),#A78BFA);
+      border-radius:3px; margin:0 auto 1.25rem;
     }
 
-    /* ─────────────────────────────────────────────────────────
-       SKELETON SHIMMER (before results render)
-    ───────────────────────────────────────────────────────── */
+    .owner-section-title {
+      font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700;
+      color:var(--charcoal); margin-bottom:1.2rem;
+      display:flex; align-items:center; gap:.5rem;
+    }
+    .owner-section-title i { color:var(--owner-accent); }
+
+    .owner-add-card {
+      background:var(--card-bg); border:1px solid var(--border);
+      border-radius:var(--radius); padding:2rem; box-shadow:var(--shadow-sm); margin-bottom:2rem;
+    }
+
+    .tag-select-grid {
+      display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.5rem;
+    }
+    .tag-toggle {
+      background:var(--warm-grey); border:1.5px solid var(--border);
+      border-radius:50px; padding:.28rem .75rem; font-size:.75rem; font-weight:500;
+      cursor:pointer; transition:all var(--transition); user-select:none; color:var(--charcoal);
+    }
+    .tag-toggle.selected {
+      background:var(--owner-accent); color:#fff; border-color:var(--owner-accent);
+    }
+
+    .btn-owner-submit {
+      background:linear-gradient(135deg,var(--owner-accent),#6D28D9); color:#fff; border:none;
+      border-radius:50px; padding:.65rem 2rem; font-size:.9rem; font-weight:600; width:100%;
+      transition:all var(--transition); position:relative; overflow:hidden;
+    }
+    .btn-owner-submit:hover { transform:translateY(-2px); box-shadow:0 6px 24px rgba(124,58,237,.35); }
+
+    .my-listing-card {
+      background:var(--card-bg); border:1px solid var(--border);
+      border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-sm);
+      margin-bottom:1rem; transition:transform var(--transition), box-shadow var(--transition);
+    }
+    .my-listing-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-md); }
+    .my-listing-inner { display:flex; align-items:center; gap:1rem; padding:1.1rem 1.4rem; }
+    .listing-icon {
+      width:48px; height:48px; border-radius:12px; flex-shrink:0;
+      background:linear-gradient(135deg,var(--owner-light),#C4B5FD);
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.3rem; color:var(--owner-accent);
+    }
+    .listing-body { flex:1; min-width:0; }
+    .listing-name { font-weight:700; font-size:.95rem; color:var(--charcoal); margin-bottom:.15rem; }
+    .listing-meta { font-size:.78rem; color:var(--mid-grey); display:flex; flex-wrap:wrap; gap:.7rem; }
+    .btn-delete-listing {
+      background:transparent; border:1.5px solid #FECACA; color:#DC2626;
+      border-radius:50px; padding:.3rem .85rem; font-size:.78rem; font-weight:600;
+      cursor:pointer; transition:all var(--transition); white-space:nowrap; flex-shrink:0;
+    }
+    .btn-delete-listing:hover { background:#FEE2E2; }
+
+    /* Auth Modal */
+    .auth-tabs { display:flex; border-bottom:1px solid var(--border); margin-bottom:1.5rem; }
+    .auth-tab {
+      flex:1; text-align:center; padding:.75rem; font-weight:600; font-size:.85rem;
+      cursor:pointer; border-bottom:2px solid transparent; transition:all var(--transition);
+      color:var(--mid-grey);
+    }
+    .auth-tab.active { border-bottom-color:var(--charcoal); color:var(--charcoal); }
+
+    .role-selector { display:flex; gap:.75rem; margin-bottom:1.2rem; }
+    .role-card {
+      flex:1; border:1.5px solid var(--border); border-radius:12px; padding:.9rem .75rem;
+      text-align:center; cursor:pointer; transition:all var(--transition);
+    }
+    .role-card:hover { border-color:var(--gold); }
+    .role-card.selected.customer { border-color:#0369A1; background:#EFF6FF; }
+    .role-card.selected.owner    { border-color:var(--owner-accent); background:var(--owner-light); }
+    .role-card-icon { font-size:1.4rem; margin-bottom:.35rem; }
+    .role-card-title { font-weight:700; font-size:.82rem; color:var(--charcoal); }
+    .role-card-sub   { font-size:.72rem; color:var(--mid-grey); }
+
+    /* Footer */
+    .am-footer { border-top:1px solid var(--border); padding:2rem 0; text-align:center; font-size:.8rem; color:var(--mid-grey); }
+    .am-footer strong { color:var(--charcoal); }
+
+    /* Responsive */
+    @media (max-width:768px) {
+      .hero-section { padding:3.5rem 0 2rem; }
+      .hero-title { font-size:2.2rem; }
+      .drop-zone { padding:2.2rem 1.2rem; }
+      .processing-card { padding:2.8rem 1.5rem; }
+      .results-section { padding:2rem 0 3rem; }
+      .mua-card-inner { flex-direction:column; }
+      .rank-strip { width:100%; flex-direction:row; padding:.6rem 1rem; gap:.4rem; }
+      .preview-card { position:static; }
+      .nav-auth .btn-nav-auth { font-size:.72rem; padding:.26rem .7rem; }
+    }
+
     @keyframes shimmer {
-      0% {
-        background-position: -400px 0;
-      }
-
-      100% {
-        background-position: 400px 0;
-      }
+      0%   { background-position:-400px 0; }
+      100% { background-position:400px 0; }
     }
-
     .shimmer {
-      background: linear-gradient(90deg, var(--warm-grey) 25%, #EEE9E0 50%, var(--warm-grey) 75%);
-      background-size: 800px 100%;
-      animation: shimmer 1.4s infinite;
-      border-radius: 4px;
+      background:linear-gradient(90deg,var(--warm-grey) 25%,#EEE9E0 50%,var(--warm-grey) 75%);
+      background-size:800px 100%; animation:shimmer 1.4s infinite; border-radius:4px;
     }
   </style>
 </head>
@@ -1075,9 +634,12 @@
 
   <!-- ── NAVBAR ─────────────────────────────────────────── -->
   <nav class="am-nav">
-    <div class="container d-flex align-items-center justify-content-between">
+    <div class="container d-flex align-items-center justify-content-between gap-3">
       <a href="#" class="brand" id="nav-brand-link">Aura<span>Match</span></a>
-      <span class="nav-pill"><i class="bi bi-stars me-1"></i>Delhi NCR</span>
+
+      <div class="nav-auth" id="nav-auth-area">
+        <!-- Rendered by JS -->
+      </div>
     </div>
   </nav>
 
@@ -1152,7 +714,7 @@
         <div class="container">
           <div class="row text-center gy-3">
             <div class="col-4">
-              <div class="stat-number">5+</div>
+              <div class="stat-number" id="stat-artists">5+</div>
               <div class="stat-label">Curated Artists</div>
             </div>
             <div class="col-4">
@@ -1173,15 +735,12 @@
     <section id="state-processing" class="state-panel">
       <div class="processing-section container">
         <div class="processing-card mx-auto">
-
           <div class="gold-spinner-wrap">
             <div class="gold-spinner"></div>
             <div class="gold-spinner-inner"></div>
           </div>
-
           <h2 class="processing-title">AI is analyzing your bridal moodboard...</h2>
           <p class="processing-sub">Groq Llama Vision is reading your aesthetic and mapping it to style tags</p>
-
           <ul class="processing-steps" id="processing-steps">
             <li id="step-1">
               <span class="step-icon" id="step-icon-1"><i class="bi bi-upload"></i></span>
@@ -1200,7 +759,6 @@
               Matching to Delhi artists
             </li>
           </ul>
-
         </div>
       </div>
     </section><!-- /state-processing -->
@@ -1209,7 +767,6 @@
     <!-- ③ RESULTS STATE ─────────────────────────────────── -->
     <section id="state-results" class="state-panel results-section">
       <div class="container">
-
         <div class="results-header">
           <div class="gold-rule"></div>
           <h2 class="results-title text-center">Your Matched Artists</h2>
@@ -1219,7 +776,6 @@
         </div>
 
         <div class="row gy-4 align-items-start">
-
           <!-- Left: image preview + AI tags -->
           <div class="col-lg-4">
             <div class="preview-card">
@@ -1241,17 +797,115 @@
           <!-- Right: MUA cards -->
           <div class="col-lg-8">
             <div id="mua-cards-container"></div>
-
             <div class="try-again-wrap">
               <button id="try-again-btn" class="btn btn-outline-gold">
                 <i class="bi bi-arrow-left me-2"></i>Try Another Photo
               </button>
             </div>
           </div>
-
         </div>
       </div>
     </section><!-- /state-results -->
+
+
+    <!-- ④ CUSTOMER DASHBOARD ─────────────────────────────── -->
+    <section id="state-customer-dash" class="state-panel dashboard-section">
+      <div class="container">
+        <div class="dash-header text-center">
+          <div class="gold-rule"></div>
+          <h2 class="dash-title">My Booking History</h2>
+          <p style="color:var(--mid-grey);font-size:.9rem;">All your consultation requests in one place</p>
+        </div>
+
+        <div class="row justify-content-center">
+          <div class="col-lg-8">
+            <div id="customer-bookings-list">
+              <!-- Populated by JS -->
+            </div>
+            <div class="try-again-wrap mt-3">
+              <button class="btn btn-gold" onclick="showState('landing')">
+                <i class="bi bi-search me-2"></i>Find New Artist
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section><!-- /state-customer-dash -->
+
+
+    <!-- ⑤ OWNER DASHBOARD ─────────────────────────────────── -->
+    <section id="state-owner-dash" class="state-panel dashboard-section">
+      <div class="container">
+        <div class="dash-header text-center">
+          <div class="owner-accent-line"></div>
+          <h2 class="dash-title">Salon Owner Dashboard</h2>
+          <p style="color:var(--mid-grey);font-size:.9rem;">Manage your listings and reach thousands of brides</p>
+        </div>
+
+        <div class="row gy-4">
+
+          <!-- Add new listing form -->
+          <div class="col-lg-5">
+            <div class="owner-add-card">
+              <div class="owner-section-title">
+                <i class="bi bi-plus-circle-fill"></i> Add New Listing
+              </div>
+
+              <form id="owner-listing-form" novalidate>
+                <div class="mb-3">
+                  <label class="form-label">Salon / Artist Name *</label>
+                  <input type="text" class="form-control" id="ol-name" placeholder="e.g. Glamour By Neha" required />
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Location in Delhi *</label>
+                  <input type="text" class="form-control" id="ol-location" placeholder="e.g. Connaught Place, Central Delhi" required />
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Starting Price *</label>
+                  <input type="text" class="form-control" id="ol-price" placeholder="e.g. ₹12,000" required />
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Instagram Handle *</label>
+                  <input type="text" class="form-control" id="ol-instagram" placeholder="e.g. @glamour.by.neha" required />
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Phone Number *</label>
+                  <input type="tel" class="form-control" id="ol-phone" placeholder="+91 98765 00000" required />
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Portfolio Website</label>
+                  <input type="url" class="form-control" id="ol-portfolio" placeholder="https://mysalon.com" />
+                </div>
+                <div class="mb-4">
+                  <label class="form-label">Style Tags * <span style="color:var(--mid-grey);font-weight:400;">(select at least 1)</span></label>
+                  <div class="tag-select-grid" id="tag-select-grid">
+                    <!-- Populated by JS -->
+                  </div>
+                </div>
+
+                <div id="ol-error" class="text-danger small mb-3 d-none"></div>
+                <div id="ol-success" class="text-success small mb-3 d-none"></div>
+
+                <button type="submit" class="btn-owner-submit" id="ol-submit-btn">
+                  <i class="bi bi-rocket-takeoff me-2"></i>Publish Listing
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- My listings -->
+          <div class="col-lg-7">
+            <div class="owner-section-title">
+              <i class="bi bi-collection-fill"></i> My Listings
+            </div>
+            <div id="owner-listings-list">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section><!-- /state-owner-dash -->
 
   </main>
 
@@ -1266,53 +920,110 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body p-4" id="booking-modal-body">
-
-          <!-- Artist badge -->
           <div class="modal-artist-badge" id="modal-artist-badge">
             <i class="bi bi-person-circle"></i>
             <span id="modal-artist-name">Artist Name</span>
           </div>
-
-          <!-- Direct call strip -->
           <div class="modal-phone-strip">
             <i class="bi bi-telephone-fill"></i>
             <span class="ph-num" id="modal-artist-phone">+91 00000 00000</span>
             <a href="#" id="modal-call-link">📞 Tap to Call</a>
           </div>
-
-          <!-- Booking form -->
           <form id="booking-form" novalidate>
             <input type="hidden" id="booking-artist-id" value="" />
-
             <div class="mb-3">
               <label for="client-name" class="form-label">Your Full Name *</label>
               <input type="text" class="form-control" id="client-name" placeholder="e.g. Riya Kapoor" required />
             </div>
-
             <div class="mb-3">
               <label for="client-phone" class="form-label">Your Phone Number *</label>
               <input type="tel" class="form-control" id="client-phone" placeholder="+91 98765 00000" required />
             </div>
-
             <div class="mb-3">
               <label for="preferred-date" class="form-label">Preferred Appointment Date *</label>
               <input type="date" class="form-control" id="preferred-date" required />
             </div>
-
             <div class="mb-4">
-              <label for="booking-message" class="form-label">Message <span
-                  style="color:var(--mid-grey);font-weight:400;">(optional)</span></label>
+              <label for="booking-message" class="form-label">Message <span style="color:var(--mid-grey);font-weight:400;">(optional)</span></label>
               <textarea class="form-control" id="booking-message" rows="2"
                 placeholder="e.g. Looking for a dewy, soft-glam bridal look for my November wedding."></textarea>
             </div>
-
             <div id="booking-form-error" class="text-danger small mb-3 d-none"></div>
-
             <button type="submit" class="btn-submit-book" id="submit-booking-btn">
               <i class="bi bi-check2-circle me-2"></i>Confirm Consultation Request
             </button>
           </form>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <!-- ── AUTH MODAL ──────────────────────────────────────────── -->
+  <div class="modal fade" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
+      <div class="modal-content">
+        <div class="modal-header pb-0 border-0">
+          <h5 class="modal-title w-100 text-center" id="authModalLabel" style="font-family:'Playfair Display',serif;font-size:1.25rem;">
+            Welcome to <span style="color:var(--gold-dark);">AuraMatch</span>
+          </h5>
+          <button type="button" class="btn-close position-absolute end-0 me-3 top-50 translate-middle-y" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body px-4 pb-4">
+          <!-- Tabs -->
+          <div class="auth-tabs mt-3">
+            <div class="auth-tab active" id="auth-tab-login" onclick="switchAuthTab('login')">Sign In</div>
+            <div class="auth-tab"         id="auth-tab-register" onclick="switchAuthTab('register')">Create Account</div>
+          </div>
+
+          <!-- Login Form -->
+          <div id="auth-login-form">
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-control" id="login-email" placeholder="you@example.com" />
+            </div>
+            <div class="mb-4">
+              <label class="form-label">Password</label>
+              <input type="password" class="form-control" id="login-password" placeholder="••••••••" />
+            </div>
+            <div id="login-error" class="text-danger small mb-3 d-none"></div>
+            <button class="btn-submit-book" id="login-submit-btn" onclick="handleLogin()">
+              <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+            </button>
+          </div>
+
+          <!-- Register Form -->
+          <div id="auth-register-form" style="display:none;">
+            <!-- Role selector -->
+            <p class="text-center" style="font-size:.82rem;color:var(--mid-grey);margin-bottom:.75rem;">I am a...</p>
+            <div class="role-selector mb-3">
+              <div class="role-card customer selected" id="role-card-customer" onclick="selectRole('customer')">
+                <div class="role-card-icon">👰</div>
+                <div class="role-card-title">Customer</div>
+                <div class="role-card-sub">Looking for artists</div>
+              </div>
+              <div class="role-card owner" id="role-card-owner" onclick="selectRole('owner')">
+                <div class="role-card-icon">💄</div>
+                <div class="role-card-title">Salon Owner</div>
+                <div class="role-card-sub">List my services</div>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Full Name *</label>
+              <input type="text" class="form-control" id="reg-name" placeholder="Riya Kapoor" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Email *</label>
+              <input type="email" class="form-control" id="reg-email" placeholder="you@example.com" />
+            </div>
+            <div class="mb-4">
+              <label class="form-label">Password * <span style="color:var(--mid-grey);font-weight:400;">(min. 6 chars)</span></label>
+              <input type="password" class="form-control" id="reg-password" placeholder="••••••••" />
+            </div>
+            <div id="register-error" class="text-danger small mb-3 d-none"></div>
+            <button class="btn-submit-book" id="register-submit-btn" onclick="handleRegister()">
+              <i class="bi bi-person-plus me-2"></i>Create Account
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1322,96 +1033,445 @@
   <footer class="am-footer">
     <div class="container">
       <strong>AuraMatch Delhi</strong> &nbsp;·&nbsp;
-      Built for Beauty Salon Marketplace Challenge &nbsp;·&nbsp;
+      AI-powered Bridal Matchmaker &nbsp;·&nbsp;
       Powered by Groq Llama Vision
     </div>
   </footer>
 
-  <!-- ── Bootstrap JS ────────────────────────────────────── -->
+  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
     /* ═══════════════════════════════════════════════════════════
        AURAMATCH DELHI — APP LOGIC
-       Three states: landing → processing → results
     ═══════════════════════════════════════════════════════════ */
 
-    const API_BASE = 'https://auramatch-oz0z.onrender.com';
+    const API_BASE = 'http://127.0.0.1:5000';
 
-    // ── DOM refs ───────────────────────────────────────────────
-    const panels = {
-      landing: document.getElementById('state-landing'),
-      processing: document.getElementById('state-processing'),
-      results: document.getElementById('state-results'),
-    };
+    const ALL_TAGS = [
+      "dewy","pastel","minimalist eye","nude lip","hd makeup",
+      "bold glam","smokey eye","matte finish","red lip","airbrush",
+      "traditional","heavy contour","gold shimmer","natural","winged liner",
+    ];
 
-    const dropZone = document.getElementById('drop-zone');
-    const fileInput = document.getElementById('file-input');
-    const browseBtn = document.getElementById('browse-btn');
-    const previewImage = document.getElementById('preview-image');
-    const aiTagsContainer = document.getElementById('ai-tags-container');
-    const muaCardsContainer = document.getElementById('mua-cards-container');
-    const fallbackNotice = document.getElementById('fallback-notice');
-    const tryAgainBtn = document.getElementById('try-again-btn');
-    const navBrandLink = document.getElementById('nav-brand-link');
+    /* ── Auth state ────────────────────────────────────────── */
+    let currentUser = null;
+    let authToken   = null;
 
-    // Processing step icons
-    const stepIcons = [1, 2, 3, 4].map(n => document.getElementById(`step-icon-${n}`));
-
-    // ── State machine ──────────────────────────────────────────
-    function showState(name) {
-      Object.entries(panels).forEach(([key, el]) => {
-        el.classList.toggle('active', key === name);
-      });
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    function loadAuthState() {
+      try {
+        authToken   = localStorage.getItem('am_token');
+        currentUser = JSON.parse(localStorage.getItem('am_user') || 'null');
+      } catch(_) {}
     }
 
-    // ── Drag & Drop wiring ─────────────────────────────────────
-    dropZone.addEventListener('dragover', e => {
+    function saveAuthState(token, user) {
+      authToken   = token;
+      currentUser = user;
+      localStorage.setItem('am_token', token);
+      localStorage.setItem('am_user', JSON.stringify(user));
+    }
+
+    function clearAuthState() {
+      authToken   = null;
+      currentUser = null;
+      localStorage.removeItem('am_token');
+      localStorage.removeItem('am_user');
+    }
+
+    function authHeaders() {
+      return authToken ? { 'Authorization': `Bearer ${authToken}` } : {};
+    }
+
+    /* ── DOM refs ───────────────────────────────────────────── */
+    const panels = {
+      landing:       document.getElementById('state-landing'),
+      processing:    document.getElementById('state-processing'),
+      results:       document.getElementById('state-results'),
+      customerDash:  document.getElementById('state-customer-dash'),
+      ownerDash:     document.getElementById('state-owner-dash'),
+    };
+    const dropZone         = document.getElementById('drop-zone');
+    const fileInput        = document.getElementById('file-input');
+    const browseBtn        = document.getElementById('browse-btn');
+    const previewImage     = document.getElementById('preview-image');
+    const aiTagsContainer  = document.getElementById('ai-tags-container');
+    const muaCardsContainer= document.getElementById('mua-cards-container');
+    const fallbackNotice   = document.getElementById('fallback-notice');
+    const tryAgainBtn      = document.getElementById('try-again-btn');
+    const navBrandLink     = document.getElementById('nav-brand-link');
+    const navAuthArea      = document.getElementById('nav-auth-area');
+    const stepIcons        = [1,2,3,4].map(n => document.getElementById(`step-icon-${n}`));
+
+    /* ── State machine ─────────────────────────────────────── */
+    function showState(name) {
+      const keyMap = {
+        landing:       'landing',
+        processing:    'processing',
+        results:       'results',
+        'customer-dash': 'customerDash',
+        'owner-dash':    'ownerDash',
+      };
+      Object.entries(panels).forEach(([key, el]) => {
+        el.classList.toggle('active', key === (keyMap[name] || name));
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Load data when entering dashboards
+      if (name === 'customer-dash') loadCustomerBookings();
+      if (name === 'owner-dash')    { loadOwnerListings(); buildTagGrid(); }
+    }
+
+    /* ── Navbar render ─────────────────────────────────────── */
+    function renderNav() {
+      if (!currentUser) {
+        navAuthArea.innerHTML = `
+          <button class="btn-nav-auth" id="nav-login-btn" onclick="openAuthModal('login')">Sign In</button>
+          <button class="btn-nav-auth primary" id="nav-register-btn" onclick="openAuthModal('register')">Join Free</button>
+        `;
+      } else {
+        const roleLabel = currentUser.role === 'owner' ? 'Salon Owner' : 'Customer';
+        const roleIcon  = currentUser.role === 'owner' ? 'bi-shop' : 'bi-person';
+        navAuthArea.innerHTML = `
+          <span class="nav-user-chip role-${currentUser.role}">
+            <span class="role-avatar"><i class="bi ${roleIcon}"></i></span>
+            ${escHtml(currentUser.name)}
+          </span>
+          ${currentUser.role === 'customer'
+            ? `<button class="btn-nav-auth" id="nav-dash-btn" onclick="showState('customer-dash')"><i class="bi bi-calendar-check me-1"></i>My Bookings</button>`
+            : `<button class="btn-nav-auth" id="nav-dash-btn" onclick="showState('owner-dash')" style="color:var(--owner-accent);border-color:var(--owner-accent);"><i class="bi bi-shop me-1"></i>My Salon</button>`
+          }
+          <button class="btn-nav-logout" id="nav-logout-btn" onclick="handleLogout()"><i class="bi bi-box-arrow-right"></i></button>
+        `;
+      }
+    }
+
+    /* ── Auth Modal ────────────────────────────────────────── */
+    const authModal = new bootstrap.Modal(document.getElementById('authModal'));
+    let selectedRole = 'customer';
+
+    function openAuthModal(tab = 'login') {
+      switchAuthTab(tab);
+      authModal.show();
+    }
+
+    function switchAuthTab(tab) {
+      document.getElementById('auth-tab-login').classList.toggle('active', tab === 'login');
+      document.getElementById('auth-tab-register').classList.toggle('active', tab === 'register');
+      document.getElementById('auth-login-form').style.display    = tab === 'login'    ? '' : 'none';
+      document.getElementById('auth-register-form').style.display = tab === 'register' ? '' : 'none';
+      clearAuthErrors();
+    }
+
+    function selectRole(role) {
+      selectedRole = role;
+      document.getElementById('role-card-customer').classList.toggle('selected', role === 'customer');
+      document.getElementById('role-card-owner').classList.toggle('selected', role === 'owner');
+    }
+
+    function clearAuthErrors() {
+      ['login-error','register-error'].forEach(id => {
+        const el = document.getElementById(id);
+        el.classList.add('d-none');
+        el.textContent = '';
+      });
+    }
+
+    async function handleLogin() {
+      const email    = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value.trim();
+      const errorEl  = document.getElementById('login-error');
+      const btn      = document.getElementById('login-submit-btn');
+
+      if (!email || !password) {
+        errorEl.textContent = 'Please enter your email and password.';
+        errorEl.classList.remove('d-none');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Signing in...';
+      errorEl.classList.add('d-none');
+
+      try {
+        const res  = await fetch(`${API_BASE}/api/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Login failed.');
+        saveAuthState(data.token, data.user);
+        authModal.hide();
+        renderNav();
+        // Redirect to appropriate dashboard
+        showState(data.user.role === 'owner' ? 'owner-dash' : 'customer-dash');
+      } catch (err) {
+        errorEl.textContent = err.message;
+        errorEl.classList.remove('d-none');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-box-arrow-in-right me-2"></i>Sign In';
+      }
+    }
+
+    async function handleRegister() {
+      const name     = document.getElementById('reg-name').value.trim();
+      const email    = document.getElementById('reg-email').value.trim();
+      const password = document.getElementById('reg-password').value.trim();
+      const errorEl  = document.getElementById('register-error');
+      const btn      = document.getElementById('register-submit-btn');
+
+      if (!name || !email || !password) {
+        errorEl.textContent = 'Please fill in all fields.';
+        errorEl.classList.remove('d-none');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creating account...';
+      errorEl.classList.add('d-none');
+
+      try {
+        const res  = await fetch(`${API_BASE}/api/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password, role: selectedRole }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Registration failed.');
+        saveAuthState(data.token, data.user);
+        authModal.hide();
+        renderNav();
+        showState(data.user.role === 'owner' ? 'owner-dash' : 'customer-dash');
+      } catch (err) {
+        errorEl.textContent = err.message;
+        errorEl.classList.remove('d-none');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-person-plus me-2"></i>Create Account';
+      }
+    }
+
+    function handleLogout() {
+      clearAuthState();
+      renderNav();
+      showState('landing');
+    }
+
+    /* ── Customer Dashboard ────────────────────────────────── */
+    async function loadCustomerBookings() {
+      const container = document.getElementById('customer-bookings-list');
+      container.innerHTML = `<div class="text-center py-4"><div class="gold-spinner mx-auto" style="width:40px;height:40px;"></div></div>`;
+
+      try {
+        const res  = await fetch(`${API_BASE}/api/my-bookings`, {
+          headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        });
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error || 'Failed to load bookings.');
+
+        if (data.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <i class="bi bi-calendar-x"></i>
+              <h5>No bookings yet</h5>
+              <p>Upload a photo and book your first consultation!</p>
+            </div>`;
+        } else {
+          container.innerHTML = '';
+          data.forEach(b => container.appendChild(buildBookingHistCard(b)));
+        }
+      } catch (err) {
+        container.innerHTML = `<div class="text-center text-danger py-3">${escHtml(err.message)}</div>`;
+      }
+    }
+
+    function buildBookingHistCard(b) {
+      const card = document.createElement('div');
+      card.className = 'booking-history-card';
+      const fmtDate = b.preferred_date
+        ? new Date(b.preferred_date + 'T00:00:00').toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })
+        : '—';
+      card.innerHTML = `
+        <div class="booking-history-inner">
+          <div class="booking-hist-icon"><i class="bi bi-calendar-heart"></i></div>
+          <div class="booking-hist-body">
+            <div class="booking-hist-artist">${escHtml(b.artist_name)}</div>
+            <div class="booking-hist-meta">
+              <span><i class="bi bi-person"></i> ${escHtml(b.client_name)}</span>
+              <span><i class="bi bi-telephone"></i> ${escHtml(b.client_phone)}</span>
+              ${b.message ? `<span><i class="bi bi-chat"></i> ${escHtml(b.message.slice(0,40))}${b.message.length>40?'…':''}</span>` : ''}
+            </div>
+          </div>
+          <div class="booking-hist-date"><i class="bi bi-calendar3 me-1"></i>${escHtml(fmtDate)}</div>
+        </div>`;
+      return card;
+    }
+
+    /* ── Owner Dashboard ────────────────────────────────────── */
+    let selectedTags = [];
+
+    function buildTagGrid() {
+      const grid = document.getElementById('tag-select-grid');
+      if (!grid) return;
+      selectedTags = [];
+      grid.innerHTML = '';
+      ALL_TAGS.forEach(tag => {
+        const chip = document.createElement('div');
+        chip.className = 'tag-toggle';
+        chip.textContent = tag;
+        chip.onclick = () => {
+          const idx = selectedTags.indexOf(tag);
+          if (idx === -1) { selectedTags.push(tag); chip.classList.add('selected'); }
+          else            { selectedTags.splice(idx,1); chip.classList.remove('selected'); }
+        };
+        grid.appendChild(chip);
+      });
+    }
+
+    async function loadOwnerListings() {
+      const container = document.getElementById('owner-listings-list');
+      container.innerHTML = `<div class="text-center py-3"><div class="gold-spinner mx-auto" style="width:36px;height:36px;border-top-color:var(--owner-accent);border-right-color:#C4B5FD;"></div></div>`;
+
+      try {
+        const res  = await fetch(`${API_BASE}/api/my-listings`, {
+          headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to load listings.');
+
+        if (data.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <i class="bi bi-shop" style="color:#C4B5FD;"></i>
+              <h5>No listings yet</h5>
+              <p>Add your first listing to appear in customer searches!</p>
+            </div>`;
+        } else {
+          container.innerHTML = '';
+          data.forEach(a => container.appendChild(buildOwnerListingCard(a)));
+        }
+      } catch (err) {
+        container.innerHTML = `<div class="text-center text-danger py-3">${escHtml(err.message)}</div>`;
+      }
+    }
+
+    function buildOwnerListingCard(a) {
+      const card = document.createElement('div');
+      card.className = 'my-listing-card';
+      const tags = (a.style_tags || []).slice(0,3).join(', ');
+      card.innerHTML = `
+        <div class="my-listing-inner">
+          <div class="listing-icon"><i class="bi bi-shop"></i></div>
+          <div class="listing-body">
+            <div class="listing-name">${escHtml(a.name)}</div>
+            <div class="listing-meta">
+              <span><i class="bi bi-geo-alt"></i> ${escHtml(a.location)}</span>
+              <span><i class="bi bi-currency-rupee"></i> From ${escHtml(a.starting_price)}</span>
+              <span><i class="bi bi-telephone"></i> ${escHtml(a.phone)}</span>
+            </div>
+            ${tags ? `<div style="margin-top:.4rem;font-size:.73rem;color:var(--owner-accent);">${escHtml(tags)}${a.style_tags.length>3?' +'+( a.style_tags.length-3)+' more':''}</div>` : ''}
+          </div>
+          <button class="btn-delete-listing" onclick="deleteListing(${a.id}, this)">
+            <i class="bi bi-trash me-1"></i>Delete
+          </button>
+        </div>`;
+      return card;
+    }
+
+    async function deleteListing(artistId, btn) {
+      if (!confirm('Delete this listing? This cannot be undone.')) return;
+      btn.disabled = true;
+      btn.textContent = 'Deleting...';
+      try {
+        const res = await fetch(`${API_BASE}/api/artists/${artistId}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Delete failed.');
+        loadOwnerListings();
+      } catch (err) {
+        alert(err.message);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-trash me-1"></i>Delete';
+      }
+    }
+
+    document.getElementById('owner-listing-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      dropZone.classList.add('dragover');
+      const errorEl   = document.getElementById('ol-error');
+      const successEl = document.getElementById('ol-success');
+      const btn       = document.getElementById('ol-submit-btn');
+
+      errorEl.classList.add('d-none');
+      successEl.classList.add('d-none');
+
+      const name     = document.getElementById('ol-name').value.trim();
+      const location = document.getElementById('ol-location').value.trim();
+      const price    = document.getElementById('ol-price').value.trim();
+      const instagram= document.getElementById('ol-instagram').value.trim();
+      const phone    = document.getElementById('ol-phone').value.trim();
+      const portfolio= document.getElementById('ol-portfolio').value.trim();
+
+      if (!name || !location || !price || !instagram || !phone || selectedTags.length === 0) {
+        errorEl.textContent = 'Please fill all required fields and select at least one style tag.';
+        errorEl.classList.remove('d-none');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Publishing...';
+
+      try {
+        const res  = await fetch(`${API_BASE}/api/artists`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...authHeaders() },
+          body: JSON.stringify({
+            name, location, starting_price: price, instagram,
+            phone, portfolio_url: portfolio || undefined,
+            style_tags: selectedTags,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to publish listing.');
+
+        successEl.textContent = `"${data.artist.name}" published! Customers can now find you.`;
+        successEl.classList.remove('d-none');
+        document.getElementById('owner-listing-form').reset();
+        buildTagGrid();
+        loadOwnerListings();
+      } catch (err) {
+        errorEl.textContent = err.message;
+        errorEl.classList.remove('d-none');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-rocket-takeoff me-2"></i>Publish Listing';
+      }
     });
+
+    /* ── Drag & Drop wiring ─────────────────────────────────── */
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
     dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
     dropZone.addEventListener('drop', e => {
-      e.preventDefault();
-      dropZone.classList.remove('dragover');
-      const file = e.dataTransfer.files[0];
-      if (file) handleFile(file);
+      e.preventDefault(); dropZone.classList.remove('dragover');
+      const file = e.dataTransfer.files[0]; if (file) handleFile(file);
     });
-
-    // Click to browse
-    browseBtn.addEventListener('click', e => {
-      e.stopPropagation();
-      fileInput.click();
-    });
+    browseBtn.addEventListener('click', e => { e.stopPropagation(); fileInput.click(); });
     dropZone.addEventListener('click', () => fileInput.click());
-    dropZone.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
-    });
-    fileInput.addEventListener('change', () => {
-      if (fileInput.files[0]) handleFile(fileInput.files[0]);
-      fileInput.value = ''; // reset so same file can be reselected
-    });
+    dropZone.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); } });
+    fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); fileInput.value = ''; });
 
-    // Reset
     tryAgainBtn.addEventListener('click', () => showState('landing'));
     navBrandLink.addEventListener('click', e => { e.preventDefault(); showState('landing'); });
 
-    // ── Processing step animation ──────────────────────────────
-    let stepTimer = null;
-
+    /* ── Processing step animation ─────────────────────────── */
     function animateSteps() {
-      let step = 0;
-      stepIcons.forEach(icon => {
-        icon.classList.remove('done');
-        icon.innerHTML = icon.querySelector('i')
-          ? icon.innerHTML
-          : '<i class="bi bi-circle"></i>';
-      });
-
+      stepIcons.forEach(icon => { icon.classList.remove('done'); });
       const delays = [400, 1200, 2200, 3100];
-
-      stepTimer = delays.forEach((delay, i) => {
+      delays.forEach((delay, i) => {
         setTimeout(() => {
           if (panels.processing.classList.contains('active')) {
             stepIcons[i].classList.add('done');
@@ -1421,62 +1481,41 @@
       });
     }
 
-    // ── File → base64 → API call ──────────────────────────────
+    /* ── File → base64 → API call ──────────────────────────── */
     function handleFile(file) {
-      if (!file.type.startsWith('image/')) {
-        alert('Please upload an image file (JPG, PNG, or WEBP).');
-        return;
-      }
-      if (file.size > 10 * 1024 * 1024) {
-        alert('File is too large. Please use an image under 10 MB.');
-        return;
-      }
+      if (!file.type.startsWith('image/')) { alert('Please upload an image file (JPG, PNG, or WEBP).'); return; }
+      if (file.size > 10 * 1024 * 1024)   { alert('File is too large. Please use an image under 10 MB.'); return; }
 
       const reader = new FileReader();
       reader.onload = async (e) => {
-        const dataUrl = e.target.result;                  // full data URL
-        const base64 = dataUrl.split(',')[1];            // strip MIME prefix
-
-        // Show preview image immediately
+        const dataUrl  = e.target.result;
+        const base64   = dataUrl.split(',')[1];
         previewImage.src = dataUrl;
-
-        // Transition to processing state
         showState('processing');
         animateSteps();
 
-        // Call the Flask API
         try {
           const response = await fetch(`${API_BASE}/api/match`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', ...authHeaders() },
             body: JSON.stringify({ image: base64 }),
           });
-
-          if (!response.ok) {
-            const err = await response.json().catch(() => ({}));
-            throw new Error(err.error || `Server error ${response.status}`);
-          }
-
+          if (!response.ok) { const err = await response.json().catch(() => ({})); throw new Error(err.error || `Server error ${response.status}`); }
           const data = await response.json();
-
-          // Small delay so users see step 4 tick before results
           setTimeout(() => renderResults(data), 700);
-
         } catch (err) {
           console.error('API error:', err);
           setTimeout(() => {
-            alert(`Something went wrong: ${err.message}\n\nMake sure the Flask backend is running on port 5000.`);
+            alert(`Something went wrong: ${err.message}\n\nMake sure the Flask backend is running.`);
             showState('landing');
           }, 500);
         }
       };
-
       reader.readAsDataURL(file);
     }
 
-    // ── Render results ─────────────────────────────────────────
+    /* ── Render results ─────────────────────────────────────── */
     function renderResults(data) {
-      // AI tags
       aiTagsContainer.innerHTML = '';
       (data.ai_tags || []).forEach(tag => {
         const span = document.createElement('span');
@@ -1484,212 +1523,135 @@
         span.innerHTML = `<span class="tag-dot"></span>${tag}`;
         aiTagsContainer.appendChild(span);
       });
+      fallbackNotice.classList.toggle('d-none', !data.fallback);
 
-      // Fallback notice
-      if (data.fallback) {
-        fallbackNotice.classList.remove('d-none');
-      } else {
-        fallbackNotice.classList.add('d-none');
-      }
-
-      // MUA cards
       muaCardsContainer.innerHTML = '';
       const results = data.results || [];
-
       if (results.length === 0) {
         muaCardsContainer.innerHTML = `
-        <div class="text-center py-5" style="color:var(--mid-grey);">
-          <i class="bi bi-emoji-neutral" style="font-size:2.5rem;"></i>
-          <p class="mt-3">No matching artists found. Try seeding the database first.</p>
-        </div>`;
+          <div class="text-center py-5" style="color:var(--mid-grey);">
+            <i class="bi bi-emoji-neutral" style="font-size:2.5rem;"></i>
+            <p class="mt-3">No matching artists found. Try seeding the database first.</p>
+          </div>`;
       } else {
-        results.forEach((artist, idx) => {
-          muaCardsContainer.appendChild(buildMuaCard(artist, idx + 1));
-        });
+        results.forEach((artist, idx) => muaCardsContainer.appendChild(buildMuaCard(artist, idx + 1)));
       }
-
-      // Show results state
       showState('results');
-
-      // Animate match bars after DOM paint
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          document.querySelectorAll('.match-bar-fill').forEach(bar => {
-            bar.style.width = bar.dataset.pct + '%';
-          });
+          document.querySelectorAll('.match-bar-fill').forEach(bar => { bar.style.width = bar.dataset.pct + '%'; });
         });
       });
     }
 
-    // ── Build a single MUA card ────────────────────────────────
+    /* ── Build MUA card ─────────────────────────────────────── */
     function buildMuaCard(artist, rank) {
-      const medals = ['🥇', '🥈', '🥉'];
-      const score = artist.match_score ?? 0;
+      const medals = ['🥇','🥈','🥉'];
+      const score  = artist.match_score ?? 0;
       const barPct = Math.min(score, 100);
 
       const card = document.createElement('div');
       card.className = 'mua-card';
-
-      // Style tags chips (show first 3)
-      const tagChips = (artist.style_tags || [])
-        .slice(0, 4)
-        .map(t => `<span class="ai-tag" style="font-size:.73rem;padding:.2rem .7rem;">${t}</span>`)
-        .join('');
+      const tagChips = (artist.style_tags || []).slice(0,4)
+        .map(t => `<span class="ai-tag" style="font-size:.73rem;padding:.2rem .7rem;">${t}</span>`).join('');
 
       card.innerHTML = `
-      <div class="mua-card-inner">
-
-        <!-- Rank strip -->
-        <div class="rank-strip rank-${rank}">
-          <div class="rank-number">${rank}</div>
-          <div class="rank-medal">${medals[rank - 1] || ''}</div>
-        </div>
-
-        <!-- Body -->
-        <div class="mua-card-body">
-          <div class="mua-name">${escHtml(artist.name)}</div>
-          <div class="mua-location">
-            <i class="bi bi-geo-alt-fill" style="color:var(--gold);font-size:.75rem;"></i>
-            ${escHtml(artist.location)}
+        <div class="mua-card-inner">
+          <div class="rank-strip rank-${rank}">
+            <div class="rank-number">${rank}</div>
+            <div class="rank-medal">${medals[rank-1] || ''}</div>
           </div>
-
-          <!-- Match bar -->
-          <div class="match-bar-wrap">
-            <div class="match-bar-header">
-              <span class="match-label">Aesthetic Match</span>
-              <span class="match-pct">${score}%</span>
+          <div class="mua-card-body">
+            <div class="mua-name">${escHtml(artist.name)}</div>
+            <div class="mua-location">
+              <i class="bi bi-geo-alt-fill" style="color:var(--gold);font-size:.75rem;"></i>
+              ${escHtml(artist.location)}
             </div>
-            <div class="match-bar-bg">
-              <div
-                class="match-bar-fill"
-                style="width:0%"
-                data-pct="${barPct}"
-              ></div>
+            <div class="match-bar-wrap">
+              <div class="match-bar-header">
+                <span class="match-label">Aesthetic Match</span>
+                <span class="match-pct">${score}%</span>
+              </div>
+              <div class="match-bar-bg">
+                <div class="match-bar-fill" style="width:0%" data-pct="${barPct}"></div>
+              </div>
+            </div>
+            <div class="mua-meta">
+              <span class="meta-chip"><i class="bi bi-currency-rupee"></i>From ${escHtml(artist.starting_price)}</span>
+              <span class="meta-chip"><i class="bi bi-instagram"></i>${escHtml(artist.instagram)}</span>
+            </div>
+            <div class="mb-3" style="line-height:2;">${tagChips}</div>
+            <div class="mua-card-actions">
+              <button type="button" class="btn btn-book" id="book-btn-${rank}"
+                data-artist-id="${artist.id}"
+                data-artist-name="${escHtml(artist.name)}"
+                data-artist-phone="${escHtml(artist.phone||'')}"
+                onclick="openBookingModal(this)">
+                <i class="bi bi-calendar-check me-1"></i>Book Consultation
+              </button>
+              <a href="tel:${escHtml((artist.phone||'').replace(/\s/g,''))}"
+                class="btn-call" aria-label="Call ${escHtml(artist.name)}"
+                title="Call: ${escHtml(artist.phone||'')}" id="call-btn-${rank}">
+                <i class="bi bi-telephone-fill"></i>
+              </a>
+              <a href="https://instagram.com/${escHtml(artist.instagram.replace('@',''))}"
+                target="_blank" rel="noopener"
+                class="btn-ig" aria-label="Instagram" id="ig-btn-${rank}">
+                <i class="bi bi-instagram"></i>
+              </a>
             </div>
           </div>
-
-          <!-- Meta chips -->
-          <div class="mua-meta">
-            <span class="meta-chip">
-              <i class="bi bi-currency-rupee"></i>
-              From ${escHtml(artist.starting_price)}
-            </span>
-            <span class="meta-chip">
-              <i class="bi bi-instagram"></i>
-              ${escHtml(artist.instagram)}
-            </span>
-          </div>
-
-          <!-- Style tags -->
-          <div class="mb-3" style="line-height:2;">
-            ${tagChips}
-          </div>
-
-          <!-- CTA -->
-          <div class="mua-card-actions">
-            <button
-              type="button"
-              class="btn btn-book"
-              id="book-btn-${rank}"
-              data-artist-id="${artist.id}"
-              data-artist-name="${escHtml(artist.name)}"
-              data-artist-phone="${escHtml(artist.phone || '')}"
-              onclick="openBookingModal(this)"
-            >
-              <i class="bi bi-calendar-check me-1"></i>Book Consultation
-            </button>
-            <a
-              href="tel:${escHtml((artist.phone || '').replace(/\s/g, ''))}"
-              class="btn-call"
-              aria-label="Call ${escHtml(artist.name)}"
-              title="Call: ${escHtml(artist.phone || '')}"
-              id="call-btn-${rank}"
-            >
-              <i class="bi bi-telephone-fill"></i>
-            </a>
-            <a
-              href="https://instagram.com/${escHtml(artist.instagram.replace('@', ''))}"
-              target="_blank"
-              rel="noopener"
-              class="btn-ig"
-              aria-label="Instagram"
-              id="ig-btn-${rank}"
-            >
-              <i class="bi bi-instagram"></i>
-            </a>
-          </div>
-
-        </div><!-- /mua-card-body -->
-      </div><!-- /mua-card-inner -->
-    `;
-
+        </div>`;
       return card;
     }
 
-    // ── XSS guard ──────────────────────────────────────────────
-    function escHtml(str) {
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-    }
+    /* ── Booking modal ──────────────────────────────────────── */
+    const bookingModal    = new bootstrap.Modal(document.getElementById('bookingModal'));
+    const bookingForm     = document.getElementById('booking-form');
+    const bookingError    = document.getElementById('booking-form-error');
+    const submitBookingBtn= document.getElementById('submit-booking-btn');
 
-    // ── Initial state ──────────────────────────────────────────
-    showState('landing');
-
-    // ── Booking modal logic ────────────────────────────────────
-    const bookingModal = new bootstrap.Modal(document.getElementById('bookingModal'));
-    const bookingForm = document.getElementById('booking-form');
-    const bookingError = document.getElementById('booking-form-error');
-    const submitBookingBtn = document.getElementById('submit-booking-btn');
-
-    // Set tomorrow as the minimum bookable date
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     document.getElementById('preferred-date').min = tomorrow.toISOString().split('T')[0];
 
     function openBookingModal(btn) {
-      const artistId = btn.dataset.artistId;
-      const artistName = btn.dataset.artistName;
+      const artistId    = btn.dataset.artistId;
+      const artistName  = btn.dataset.artistName;
       const artistPhone = btn.dataset.artistPhone;
 
-      document.getElementById('booking-artist-id').value = artistId;
-      document.getElementById('modal-artist-name').textContent = artistName;
+      document.getElementById('booking-artist-id').value  = artistId;
+      document.getElementById('modal-artist-name').textContent  = artistName;
       document.getElementById('modal-artist-phone').textContent = artistPhone || 'Not available';
 
       const callLink = document.getElementById('modal-call-link');
-      if (artistPhone) {
-        callLink.href = 'tel:' + artistPhone.replace(/\s/g, '');
-        callLink.style.display = '';
-      } else {
-        callLink.style.display = 'none';
+      if (artistPhone) { callLink.href = 'tel:' + artistPhone.replace(/\s/g,''); callLink.style.display = ''; }
+      else              { callLink.style.display = 'none'; }
+
+      // Pre-fill name + phone if logged in
+      if (currentUser) {
+        document.getElementById('client-name').value  = currentUser.name || '';
       }
 
-      // Reset form
       bookingForm.reset();
+      if (currentUser) document.getElementById('client-name').value = currentUser.name || '';
       bookingError.classList.add('d-none');
       bookingError.textContent = '';
-      showBookingForm();
+      const prev = document.getElementById('booking-success-view');
+      if (prev) prev.remove();
+      bookingForm.style.display = '';
       bookingModal.show();
-    }
-
-    function showBookingForm() {
-      document.getElementById('booking-form').style.display = '';
-      const success = document.getElementById('booking-success-view');
-      if (success) success.remove();
     }
 
     bookingForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       bookingError.classList.add('d-none');
 
-      const artistId = document.getElementById('booking-artist-id').value;
-      const clientName = document.getElementById('client-name').value.trim();
-      const clientPhone = document.getElementById('client-phone').value.trim();
-      const preferredDate = document.getElementById('preferred-date').value;
-      const message = document.getElementById('booking-message').value.trim();
+      const artistId     = document.getElementById('booking-artist-id').value;
+      const clientName   = document.getElementById('client-name').value.trim();
+      const clientPhone  = document.getElementById('client-phone').value.trim();
+      const preferredDate= document.getElementById('preferred-date').value;
+      const message      = document.getElementById('booking-message').value.trim();
 
       if (!clientName || !clientPhone || !preferredDate) {
         bookingError.textContent = 'Please fill in all required fields.';
@@ -1703,50 +1665,36 @@
       try {
         const res = await fetch(`${API_BASE}/api/book`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            artist_id: parseInt(artistId),
-            client_name: clientName,
-            client_phone: clientPhone,
-            preferred_date: preferredDate,
-            message,
-          }),
+          headers: { 'Content-Type': 'application/json', ...authHeaders() },
+          body: JSON.stringify({ artist_id: parseInt(artistId), client_name: clientName, client_phone: clientPhone, preferred_date: preferredDate, message }),
         });
-
         const data = await res.json();
-
         if (!res.ok) throw new Error(data.error || 'Booking failed.');
 
-        // Show success view inside modal body
-        const artistName = document.getElementById('modal-artist-name').textContent;
+        const artistName  = document.getElementById('modal-artist-name').textContent;
         const artistPhone = document.getElementById('modal-artist-phone').textContent;
-        const formattedDate = new Date(preferredDate + 'T00:00:00').toLocaleDateString('en-IN', {
-          weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-        });
+        const formattedDate = new Date(preferredDate + 'T00:00:00').toLocaleDateString('en-IN', { weekday:'long',year:'numeric',month:'long',day:'numeric' });
 
         bookingForm.style.display = 'none';
         const successDiv = document.createElement('div');
         successDiv.id = 'booking-success-view';
         successDiv.className = 'booking-success';
         successDiv.innerHTML = `
-        <div class="success-icon">✅</div>
-        <h5>Consultation Requested!</h5>
-        <p>
-          Your request with <strong>${escHtml(artistName)}</strong><br>
-          has been sent for <strong>${escHtml(formattedDate)}</strong>.
-        </p>
-        <div class="modal-phone-strip mt-3">
-          <i class="bi bi-telephone-fill"></i>
-          <span class="ph-num">${escHtml(artistPhone)}</span>
-          <a href="tel:${escHtml(artistPhone.replace(/\s/g, ''))}">📞 Call Now</a>
-        </div>
-        <p class="mt-3" style="font-size:.8rem;color:var(--mid-grey);">
-          The artist will contact you on <strong>${escHtml(clientPhone)}</strong> to confirm.
-        </p>
-        <button class="btn-submit-book mt-2" onclick="bookingModal.hide()">
-          <i class="bi bi-check-lg me-2"></i>Done
-        </button>
-      `;
+          <div class="success-icon">✅</div>
+          <h5>Consultation Requested!</h5>
+          <p>Your request with <strong>${escHtml(artistName)}</strong><br>has been sent for <strong>${escHtml(formattedDate)}</strong>.</p>
+          <div class="modal-phone-strip mt-3">
+            <i class="bi bi-telephone-fill"></i>
+            <span class="ph-num">${escHtml(artistPhone)}</span>
+            <a href="tel:${escHtml(artistPhone.replace(/\s/g,''))}">📞 Call Now</a>
+          </div>
+          <p class="mt-3" style="font-size:.8rem;color:var(--mid-grey);">
+            The artist will contact you on <strong>${escHtml(clientPhone)}</strong> to confirm.
+            ${currentUser ? '<br><em>Booking saved to your history.</em>' : ''}
+          </p>
+          <button class="btn-submit-book mt-2" onclick="bookingModal.hide()">
+            <i class="bi bi-check-lg me-2"></i>Done
+          </button>`;
         document.getElementById('booking-modal-body').appendChild(successDiv);
 
       } catch (err) {
@@ -1757,6 +1705,18 @@
         submitBookingBtn.innerHTML = '<i class="bi bi-check2-circle me-2"></i>Confirm Consultation Request';
       }
     });
+
+    /* ── XSS guard ──────────────────────────────────────────── */
+    function escHtml(str) {
+      return String(str)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+
+    /* ── Boot ───────────────────────────────────────────────── */
+    loadAuthState();
+    renderNav();
+    showState('landing');
   </script>
 
 </body>
